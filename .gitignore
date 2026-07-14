@@ -1,0 +1,13 @@
+# OS / 에디터
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# 실제 앱 스크린샷 등 개인·금융정보 (연구 원칙: 실거래 정보 0)
+assets/real/
+*.private.*
+
+# 로그/임시
+*.log
+tmp/
