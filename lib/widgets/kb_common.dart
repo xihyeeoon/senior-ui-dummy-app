@@ -92,6 +92,45 @@ class KbDevBar extends StatelessWidget {
   }
 }
 
+/// KB 내부 화면 공통 앱바: `‹ 제목            🏠 ☰`
+/// 근거: 공과금 납부/조회·촬영납부·전기요금 납부 화면 캡처에서 동일 패턴.
+class KbAppBar extends StatelessWidget {
+  final String title;
+  const KbAppBar({super.key, required this.title});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(14, 8, 16, 12),
+      child: Row(
+        children: [
+          GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => Navigator.of(context).maybePop(),
+            child: const Padding(
+              padding: EdgeInsets.only(right: 6),
+              child: Icon(Icons.arrow_back_ios_new, size: 22, color: KbColors.dark),
+            ),
+          ),
+          Expanded(
+            child: Text(title,
+                style: const TextStyle(fontSize: 21, fontWeight: FontWeight.w600)),
+          ),
+          OutOfScope(
+            label: '홈',
+            child: const Icon(Icons.home_outlined, size: 27, color: KbColors.dark),
+          ),
+          const SizedBox(width: 16),
+          OutOfScope(
+            label: '메뉴',
+            child: const Icon(Icons.menu, size: 27, color: KbColors.dark),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
 /// KB 스타일 큰 버튼 (노랑=주요 / 회색=보조).
 class KbButton extends StatelessWidget {
   final String label;
