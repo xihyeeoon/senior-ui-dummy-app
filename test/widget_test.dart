@@ -10,19 +10,19 @@ void main() {
   testWidgets('랜딩 화면에 A1/A2/C 조건이 보인다', (WidgetTester tester) async {
     await tester.pumpWidget(const DummyApp());
 
-    expect(find.text('원본 재현'), findsOneWidget);
-    expect(find.text('배포 고령자 모드'), findsOneWidget);
+    expect(find.text('원본 재현 · 기본 홈'), findsOneWidget);
+    expect(find.text('간편홈(단순화 모드)'), findsOneWidget);
     expect(find.text('도구 재설계'), findsOneWidget);
   });
 
-  testWidgets('A1 카드를 누르면 KB 홈이 열린다', (WidgetTester tester) async {
+  testWidgets('A1 카드를 누르면 기본 홈이 열린다', (WidgetTester tester) async {
     await tester.pumpWidget(const DummyApp());
 
-    await tester.tap(find.text('원본 재현'));
+    await tester.tap(find.text('원본 재현 · 기본 홈'));
     await tester.pumpAndSettle();
 
-    expect(find.text('KB마이핏통장'), findsOneWidget);
-    expect(find.text('홍길동님'), findsOneWidget);
+    expect(find.text('홍길동님'), findsOneWidget); // 기본 홈 헤더
+    expect(find.text('KB마이핏통장'), findsOneWidget); // 계좌 캐러셀 첫 카드
   });
 
   testWidgets('보안 키패드로 숫자를 입력하면 표시된다', (WidgetTester tester) async {

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import 'screens/a1_kb_home.dart';
+import 'screens/a2_kb_home.dart';
 
 void main() => runApp(const DummyApp());
 
@@ -40,16 +41,16 @@ class LandingPage extends StatelessWidget {
           _conditionCard(
             context,
             tag: 'A1',
-            title: '원본 재현',
-            desc: 'KB스타뱅킹 공과금 납부 플로우 충실 재현 (바닥 baseline)',
+            title: '원본 재현 · 기본 홈',
+            desc: 'KB스타뱅킹 기본 홈(간편홈 OFF) 충실 재현 (바닥 baseline)',
             page: const A1KbHome(),
           ),
           _conditionCard(
             context,
             tag: 'A2',
-            title: '배포 고령자 모드',
-            desc: '배포된 고령자/쉬운 모드 재현 (배포 현실 baseline)',
-            page: const _Placeholder(title: 'A2 · 배포 고령자 모드'),
+            title: '간편홈(단순화 모드)',
+            desc: 'KB 간편홈 = 배포된 단순화 모드 (배포 현실 baseline)',
+            page: const A2KbHome(),
           ),
           _conditionCard(
             context,

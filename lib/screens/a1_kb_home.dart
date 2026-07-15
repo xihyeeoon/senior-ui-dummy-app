@@ -3,13 +3,26 @@ import 'package:flutter/material.dart';
 import '../theme/kb_theme.dart';
 import '../widgets/kb_common.dart';
 
-/// A1 · KB스타뱅킹 홈 (원본 재현)
-/// 레이아웃·색·텍스트·상호작용은 실제 앱을 충실히 재현.
-/// 개인·금융정보(이름/계좌/잔액)는 더미로 치환 (연구 원칙: 실거래정보 0).
+/// A1 · KB스타뱅킹 기본 홈 (원본 일반 모드 · 간편홈 OFF) 충실 재현
+/// 실제 앱의 기본 홈 전체 스크롤 구간을 재현. 개인·금융정보는 더미로 치환.
 ///
 /// 과제(공과금 납부) 경로 밖 요소는 [showOutOfScope] 로 처리해 자유 탐색 시 안 깨지게 함.
-class A1KbHome extends StatelessWidget {
+class A1KbHome extends StatefulWidget {
   const A1KbHome({super.key});
+
+  @override
+  State<A1KbHome> createState() => _A1KbHomeState();
+}
+
+class _A1KbHomeState extends State<A1KbHome> {
+  final _pageController = PageController(viewportFraction: 0.92);
+  int _page = 0;
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -17,7 +30,7 @@ class A1KbHome extends StatelessWidget {
       backgroundColor: KbColors.bg,
       body: Column(
         children: [
-          const KbDevBar(label: 'A1 · 원본 재현 (계좌 데이터는 더미)'),
+          const KbDevBar(label: 'A1 · 원본 재현 — 기본 홈 (계좌 데이터는 더미)'),
           Expanded(
             child: SingleChildScrollView(
               child: Column(
@@ -25,13 +38,17 @@ class A1KbHome extends StatelessWidget {
                 children: [
                   const KbStatusBar(),
                   _header(context),
-                  _userRow(context),
-                  _accountCard(context),
-                  _repRow(context),
-                  _banner(context),
-                  _txnRow(context),
-                  const SizedBox(height: 8),
-                  _darkBar(context),
+                  _govBanner(context),
+                  _promoBanner(context),
+                  _allAccounts(context),
+                  _accountCarousel(context),
+                  _indicator(),
+                  _authCard(context, '인증서 로그인으로 자산 정보를 확인해 보세요'),
+                  _authCard(context, '인증서 로그인으로 지출 정보를 확인해 보세요'),
+                  _serviceGrid(context),
+                  _notice(context),
+                  _simpleHomeButton(context),
+                  const SizedBox(height: 16),
                 ],
               ),
             ),
@@ -42,12 +59,8 @@ class A1KbHome extends StatelessWidget {
     );
   }
 
+  // ---- 헤더 (프로필 + 아이콘, 간편홈 토글 없음) ----
   Widget _header(BuildContext context) {
-    Widget menu(String t) => OutOfScope(
-          label: t,
-          child: Text(t,
-              style: const TextStyle(fontSize: 16, color: Color(0xFF2A2A2E))),
-        );
     return Padding(
       padding: const EdgeInsets.fromLTRB(20, 10, 20, 6),
       child: Row(
@@ -55,96 +68,29 @@ class A1KbHome extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Text('간편홈', style: TextStyle(fontSize: 17)),
-              const SizedBox(width: 8),
-              OutOfScope(
-                label: '간편홈 토글',
-                child: Container(
-                  width: 54,
-                  height: 28,
-                  decoration: BoxDecoration(
-                    color: KbColors.yellow,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: Stack(
-                    children: [
-                      const Positioned(
-                        left: 9,
-                        top: 6,
-                        child: Text('ON',
-                            style: TextStyle(
-                                fontSize: 12,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF7A5A00))),
-                      ),
-                      Positioned(
-                        right: 3,
-                        top: 3,
-                        child: Container(
-                          width: 22,
-                          height: 22,
-                          decoration: const BoxDecoration(
-                              color: Colors.white, shape: BoxShape.circle),
-                        ),
-                      ),
-                    ],
-                  ),
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(999),
+                  border: Border.all(color: KbColors.line),
                 ),
-              ),
-            ],
-          ),
-          Row(
-            children: [
-              menu('알림'),
-              const SizedBox(width: 18),
-              menu('상담'),
-              const SizedBox(width: 18),
-              menu('검색'),
-              const SizedBox(width: 18),
-              menu('메뉴'),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _userRow(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 8, 20, 14),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          Row(
-            children: [
-              SizedBox(
-                width: 44,
-                height: 34,
-                child: Stack(
-                  clipBehavior: Clip.none,
+                child: Row(
                   children: [
                     Container(
-                      width: 40,
-                      height: 30,
-                      decoration: BoxDecoration(
-                        color: KbColors.yellow,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
+                      width: 18,
+                      height: 18,
+                      alignment: Alignment.center,
+                      decoration: const BoxDecoration(
+                          color: KbColors.green, shape: BoxShape.circle),
+                      child: const Text('F',
+                          style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w800)),
                     ),
-                    Positioned(
-                      right: 0,
-                      top: -4,
-                      child: Container(
-                        width: 16,
-                        height: 16,
-                        decoration: BoxDecoration(
-                          color: KbColors.green,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: KbColors.bg, width: 2),
-                        ),
-                        child: const Icon(Icons.check, size: 9, color: Colors.white),
-                      ),
-                    ),
+                    const SizedBox(width: 5),
+                    const Text('패밀리', style: TextStyle(fontSize: 14)),
                   ],
                 ),
               ),
@@ -154,40 +100,181 @@ class A1KbHome extends StatelessWidget {
               const Text('›', style: TextStyle(fontSize: 18, color: KbColors.gray)),
             ],
           ),
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: KbColors.line),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 18,
-                  height: 18,
-                  alignment: Alignment.center,
-                  decoration:
-                      const BoxDecoration(color: KbColors.green, shape: BoxShape.circle),
-                  child: const Text('F',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 11,
-                          fontWeight: FontWeight.w800)),
-                ),
-                const SizedBox(width: 5),
-                const Text('패밀리', style: TextStyle(fontSize: 14)),
-              ],
-            ),
+          Row(
+            children: [
+              OutOfScope(
+                label: '알림',
+                child: const _BadgeIcon(icon: Icons.notifications_none),
+              ),
+              const SizedBox(width: 16),
+              OutOfScope(
+                label: '검색',
+                child: const Icon(Icons.search, size: 26, color: Color(0xFF2A2A2E)),
+              ),
+              const SizedBox(width: 16),
+              OutOfScope(
+                label: '메뉴',
+                child: const Icon(Icons.menu, size: 26, color: Color(0xFF2A2A2E)),
+              ),
+            ],
           ),
         ],
       ),
     );
   }
 
-  Widget _accountCard(BuildContext context) {
+  // ---- 정부 지원금 배너 ----
+  Widget _govBanner(BuildContext context) {
+    return OutOfScope(
+      label: '정부 지원금 및 행정알림',
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 6, 16, 12),
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: KbColors.card,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Stack(
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text('정부 지원금 및 행정알림',
+                          style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800)),
+                      SizedBox(height: 6),
+                      Text('이제는 국민비서로\n간편하게 확인하세요!',
+                          style: TextStyle(fontSize: 15, color: Color(0xFF4A4A4F))),
+                      SizedBox(height: 14),
+                      Text('맞춤알림 받기  ›',
+                          style: TextStyle(fontSize: 15, fontWeight: FontWeight.w600)),
+                    ],
+                  ),
+                ),
+                Container(
+                  width: 64,
+                  height: 64,
+                  alignment: Alignment.center,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFDCE8FB),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(Icons.mail_outline,
+                      color: Color(0xFF3B7DD8), size: 30),
+                ),
+              ],
+            ),
+            const Positioned(
+              right: 0,
+              top: 0,
+              child: Icon(Icons.close, size: 20, color: Color(0xFFB0B4BC)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ---- 프로모 배너 (KB Youth Club) ----
+  Widget _promoBanner(BuildContext context) {
+    return OutOfScope(
+      label: 'KB Youth Club 프로모',
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+        padding: const EdgeInsets.all(18),
+        decoration: BoxDecoration(
+          color: const Color(0xFFF4F6FA),
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            const Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('워터밤속초? 캐리비안베이?',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+                  SizedBox(height: 4),
+                  Text('KB Youth Club에 다 있어요!',
+                      style: TextStyle(fontSize: 16, color: Color(0xFF4A4A4F))),
+                  SizedBox(height: 12),
+                  Row(
+                    children: [
+                      _Dot(active: true),
+                      _Dot(),
+                      _Dot(),
+                      _Dot(),
+                      _Dot(),
+                      SizedBox(width: 6),
+                      Icon(Icons.play_arrow, size: 16, color: KbColors.gray),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                gradient: const LinearGradient(
+                    colors: [Color(0xFF7C5CFF), Color(0xFFB86CE0)]),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Text('KB Youth Club',
+                  style: TextStyle(
+                      color: Colors.white, fontWeight: FontWeight.w700, fontSize: 12)),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ---- 내 계좌 전체보기 ----
+  Widget _allAccounts(BuildContext context) {
+    return OutOfScope(
+      label: '내 계좌 전체보기',
+      child: Container(
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
+        decoration: BoxDecoration(
+          color: KbColors.card,
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Row(
+          children: [
+            Container(
+              color: const Color(0xFFFFF3C4),
+              child: const Text('내 계좌 전체보기',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+            ),
+            const Spacer(),
+            const Icon(Icons.chevron_right, color: Color(0xFF9A9A9F)),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ---- 계좌 캐러셀 (PageView + 1/5) ----
+  Widget _accountCarousel(BuildContext context) {
+    return SizedBox(
+      height: 240,
+      child: PageView.builder(
+        controller: _pageController,
+        itemCount: 5,
+        onPageChanged: (i) => setState(() => _page = i),
+        itemBuilder: (_, i) =>
+            i == 0 ? _mainAccountCard(context) : _simpleAccountCard(i),
+      ),
+    );
+  }
+
+  Widget _mainAccountCard(BuildContext context) {
     return Container(
-      margin: KbGap.screenPad,
+      margin: const EdgeInsets.symmetric(horizontal: 4),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         color: KbColors.card,
@@ -199,74 +286,64 @@ class A1KbHome extends StatelessWidget {
           Row(
             children: [
               Container(
-                width: 34,
-                height: 34,
+                width: 30,
+                height: 30,
                 alignment: Alignment.center,
                 decoration: const BoxDecoration(
                     color: Color(0xFF6B5B4A), shape: BoxShape.circle),
                 child: const Text('★',
-                    style: TextStyle(
-                        color: KbColors.yellow,
-                        fontWeight: FontWeight.w800,
-                        fontSize: 15)),
+                    style: TextStyle(color: KbColors.yellow, fontSize: 13)),
               ),
               const SizedBox(width: 8),
+              const Text('KB마이핏통장',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+              const SizedBox(width: 6),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                 decoration: BoxDecoration(
                     color: KbColors.badge, borderRadius: BorderRadius.circular(6)),
-                child: const Text('한도제한계좌',
-                    style: TextStyle(
-                        fontSize: 13,
-                        color: Color(0xFF55585F),
-                        fontWeight: FontWeight.w600)),
+                child: const Text('한도제한',
+                    style: TextStyle(fontSize: 12, color: Color(0xFF55585F))),
               ),
-              const SizedBox(width: 8),
-              const Expanded(child: Text('KB마이핏통장', style: KbText.cardTitle)),
-              const Icon(Icons.more_vert, color: Color(0xFF9A9A9F)),
+              const Spacer(),
+              const Icon(Icons.more_vert, size: 20, color: Color(0xFF9A9A9F)),
             ],
           ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 2),
           const Row(
             children: [
               Text('000000-00-000000',
-                  style: TextStyle(fontSize: 19, color: Color(0xFF3A3A3E))),
-              SizedBox(width: 8),
-              Icon(Icons.copy, size: 16, color: Color(0xFFB6B6BB)),
+                  style: TextStyle(fontSize: 15, color: KbColors.gray)),
+              SizedBox(width: 6),
+              Icon(Icons.copy, size: 14, color: Color(0xFFB6B6BB)),
             ],
           ),
-          const SizedBox(height: 44),
+          const SizedBox(height: 14),
           Row(
             children: [
-              const Text('12,500원', style: KbText.balance),
-              const SizedBox(width: 10),
+              const Text('650원', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800)),
+              const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(999),
                   border: Border.all(color: KbColors.line),
                 ),
                 child: const Text('숨김',
-                    style: TextStyle(fontSize: 14, color: Color(0xFF6A6A6F))),
+                    style: TextStyle(fontSize: 13, color: KbColors.gray)),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           Row(
             children: [
+              Expanded(child: KbButton(label: '이체', onTap: () => showOutOfScope(context, '이체'))),
+              const SizedBox(width: 10),
               Expanded(
                 child: KbButton(
-                  label: '이체',
-                  onTap: () => showOutOfScope(context, '이체'),
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                child: KbButton(
-                  label: '전용화면',
-                  primary: false,
-                  onTap: () => showOutOfScope(context, '전용화면'),
-                ),
+                    label: '전용화면',
+                    primary: false,
+                    onTap: () => showOutOfScope(context, '전용화면')),
               ),
             ],
           ),
@@ -275,68 +352,64 @@ class A1KbHome extends StatelessWidget {
     );
   }
 
-  Widget _repRow(BuildContext context) {
-    return OutOfScope(
-      label: '대표계좌 설정',
-      child: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Stack(
-          alignment: Alignment.center,
-          children: const [
-            Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.settings, size: 18, color: Color(0xFF4A4A4F)),
-                SizedBox(width: 8),
-                Text('대표계좌 설정',
-                    style: TextStyle(fontSize: 17, color: Color(0xFF4A4A4F))),
-              ],
-            ),
-            Positioned(
-              right: 4,
-              child: Text('1 / 4',
-                  style: TextStyle(
-                      fontWeight: FontWeight.bold, color: Color(0xFF2A2A2E))),
-            ),
+  Widget _simpleAccountCard(int i) {
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: KbColors.card,
+        borderRadius: BorderRadius.circular(20),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('예금·적금 $i',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 2),
+          const Text('000000-00-000000',
+              style: TextStyle(fontSize: 15, color: KbColors.gray)),
+          const SizedBox(height: 40),
+          const Text('0원', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800)),
+        ],
+      ),
+    );
+  }
+
+  Widget _indicator() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 16),
+      child: Center(
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(Icons.chevron_left, size: 20, color: KbColors.gray),
+            const SizedBox(width: 12),
+            Text('${_page + 1} / 5',
+                style: const TextStyle(fontSize: 16, color: Color(0xFF4A4A4F))),
+            const SizedBox(width: 12),
+            const Icon(Icons.chevron_right, size: 20, color: KbColors.gray),
           ],
         ),
       ),
     );
   }
 
-  Widget _banner(BuildContext context) {
+  // ---- 인증서 로그인 카드 ----
+  Widget _authCard(BuildContext context, String text) {
     return OutOfScope(
-      label: '번호표 미리 뽑기',
+      label: text,
       child: Container(
-        margin: const EdgeInsets.fromLTRB(20, 4, 20, 14),
-        padding: const EdgeInsets.all(18),
+        margin: const EdgeInsets.fromLTRB(16, 0, 16, 14),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
         decoration: BoxDecoration(
           color: KbColors.card,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
           children: [
-            Container(
-              width: 52,
-              height: 52,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: const Color(0xFF86C06F),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(Icons.receipt_long, color: Colors.white, size: 26),
-            ),
-            const SizedBox(width: 14),
-            const Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('은행가서 기다리지 않는 방법',
-                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-                  SizedBox(height: 3),
-                  Text('번호표 미리 뽑기', style: KbText.sub),
-                ],
-              ),
+            Expanded(
+              child: Text(text,
+                  style: const TextStyle(fontSize: 16, color: Color(0xFF6A6A6F))),
             ),
             const Icon(Icons.chevron_right, color: Color(0xFF9A9A9F)),
           ],
@@ -345,58 +418,47 @@ class A1KbHome extends StatelessWidget {
     );
   }
 
-  Widget _txnRow(BuildContext context) {
+  // ---- 서비스 타일 그리드 ----
+  Widget _serviceGrid(BuildContext context) {
+    final tiles = <Widget>[
+      _tile(context, '모바일 신분증', Icons.badge_outlined, const Color(0xFF5B8DEF)),
+      _tile(context, 'KB Youth\nClub', Icons.groups, const Color(0xFF7C5CFF)),
+      _tile(context, 'KB증권\n주식 투자하기', Icons.trending_up, const Color(0xFFFF7A45)),
+      _tile(context, '매일\n용돈받기', Icons.savings, const Color(0xFFEF7BA0)),
+      _addTile(context),
+    ];
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: GridView.count(
+        crossAxisCount: 3,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 0.98,
+        children: tiles,
+      ),
+    );
+  }
+
+  Widget _tile(BuildContext context, String title, IconData icon, Color color) {
     return OutOfScope(
-      label: '통합거래내역',
+      label: title.replaceAll('\n', ' '),
       child: Container(
-        margin: KbGap.screenPad,
-        padding: const EdgeInsets.all(18),
+        padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: KbColors.card,
+          color: const Color(0xFFE4F1EF),
           borderRadius: BorderRadius.circular(16),
         ),
-        child: Row(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Container(
-              width: 52,
-              height: 52,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: const Color(0xFFFFD54A),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: const Icon(Icons.assignment, color: Colors.white, size: 24),
-            ),
-            const SizedBox(width: 14),
-            const Expanded(
-              child: Text('통합거래내역',
-                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
-            ),
-            Column(
-              children: [
-                Container(
-                  width: 42,
-                  height: 42,
-                  alignment: Alignment.center,
-                  decoration: const BoxDecoration(
-                      color: Color(0xFFF5B301), shape: BoxShape.circle),
-                  child: const Text('P',
-                      style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 18)),
-                ),
-                const SizedBox(height: 4),
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: KbColors.darkBar,
-                    borderRadius: BorderRadius.circular(999),
-                  ),
-                  child: const Text('매일 랜덤P',
-                      style: TextStyle(color: Colors.white, fontSize: 12)),
-                ),
-              ],
+            Text(title,
+                style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+            const Spacer(),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Icon(icon, color: color, size: 30),
             ),
           ],
         ),
@@ -404,42 +466,91 @@ class A1KbHome extends StatelessWidget {
     );
   }
 
-  Widget _darkBar(BuildContext context) {
-    Widget item(String t) => Expanded(
-          child: OutOfScope(
-            label: t,
-            child: Center(
-              child: Text(t,
-                  style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600)),
+  Widget _addTile(BuildContext context) {
+    return OutOfScope(
+      label: '메뉴 추가',
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: KbColors.card,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: KbColors.line),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Text('메뉴 추가',
+                style: TextStyle(fontSize: 15, fontWeight: FontWeight.w800)),
+            const Spacer(),
+            Align(
+              alignment: Alignment.bottomRight,
+              child: Container(
+                width: 34,
+                height: 34,
+                alignment: Alignment.center,
+                decoration: const BoxDecoration(
+                    color: Color(0xFFDDDFE4), shape: BoxShape.circle),
+                child: const Icon(Icons.add, color: Colors.white, size: 20),
+              ),
             ),
-          ),
-        );
-    return Container(
-      color: KbColors.darkBar,
-      padding: const EdgeInsets.symmetric(vertical: 14),
-      child: Row(
-        children: [
-          item('▢ KB Pay'),
-          const SizedBox(
-            height: 20,
-            child: VerticalDivider(color: Color(0xFF6A6A72), width: 1),
-          ),
-          item('🪪 국민지갑(신분증)'),
-        ],
+          ],
+        ),
       ),
     );
   }
 
+  // ---- 공지 ----
+  Widget _notice(BuildContext context) {
+    return OutOfScope(
+      label: '공지',
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(20, 20, 20, 8),
+        child: Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: KbColors.darkBar,
+                borderRadius: BorderRadius.circular(6),
+              ),
+              child: const Text('공지',
+                  style: TextStyle(color: Colors.white, fontSize: 13)),
+            ),
+            const SizedBox(width: 10),
+            const Text('KB스타뱅킹「홈 화면」개편 안내',
+                style: TextStyle(fontSize: 16, color: Color(0xFF3A3A3E))),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // ---- 간편홈 보기 버튼 ----
+  Widget _simpleHomeButton(BuildContext context) {
+    return Center(
+      child: OutOfScope(
+        label: '간편홈 보기',
+        child: Container(
+          margin: const EdgeInsets.only(top: 12),
+          padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(999),
+            border: Border.all(color: KbColors.line),
+          ),
+          child: const Text('간편홈 보기', style: TextStyle(fontSize: 16)),
+        ),
+      ),
+    );
+  }
+
+  // ---- 하단 네비 ----
   Widget _bottomNav(BuildContext context) {
     final items = [
-      (Icons.folder_outlined, '전체계좌', false),
-      (Icons.shopping_bag_outlined, '금융상품', false),
-      (Icons.pie_chart_outline, '자산관리', false),
+      (Icons.shopping_bag_outlined, '상품', false),
+      (Icons.pie_chart_outline, '자산', false),
+      (Icons.account_balance_wallet_outlined, '지갑', false),
       (Icons.card_giftcard_outlined, '혜택', false),
-      (Icons.home_outlined, '부동산', true),
+      (Icons.palette_outlined, '테마', true),
     ];
     return Container(
       height: 64,
@@ -456,17 +567,60 @@ class A1KbHome extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(it.$1, size: 24, color: active ? KbColors.dark : KbColors.gray),
+                  Icon(it.$1,
+                      size: 24, color: active ? KbColors.yellow : KbColors.gray),
                   const SizedBox(height: 3),
                   Text(it.$2,
                       style: TextStyle(
                           fontSize: 12,
+                          fontWeight: active ? FontWeight.bold : FontWeight.normal,
                           color: active ? KbColors.dark : KbColors.gray)),
                 ],
               ),
             ),
           );
         }).toList(),
+      ),
+    );
+  }
+}
+
+/// 알림 벨 + 빨간 점 배지
+class _BadgeIcon extends StatelessWidget {
+  final IconData icon;
+  const _BadgeIcon({required this.icon});
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      clipBehavior: Clip.none,
+      children: [
+        Icon(icon, size: 26, color: const Color(0xFF2A2A2E)),
+        Positioned(
+          right: 0,
+          top: 0,
+          child: Container(
+            width: 8,
+            height: 8,
+            decoration: const BoxDecoration(color: Colors.red, shape: BoxShape.circle),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _Dot extends StatelessWidget {
+  final bool active;
+  const _Dot({this.active = false});
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: active ? 16 : 6,
+      height: 6,
+      margin: const EdgeInsets.only(right: 4),
+      decoration: BoxDecoration(
+        color: active ? const Color(0xFF6A6A6F) : const Color(0xFFC9CDD4),
+        borderRadius: BorderRadius.circular(3),
       ),
     );
   }
