@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../theme/kb_theme.dart';
 import '../widgets/kb_common.dart';
+import 'a1_menu.dart';
+import 'a1_transfer_entry.dart';
 
 /// A1 · KB스타뱅킹 기본 홈 (원본 일반 모드 · 간편홈 OFF) 충실 재현
 /// 실제 앱의 기본 홈 전체 스크롤 구간을 재현. 개인·금융정보는 더미로 치환.
@@ -112,8 +114,12 @@ class _A1KbHomeState extends State<A1KbHome> {
                 child: const Icon(Icons.search, size: 26, color: Color(0xFF2A2A2E)),
               ),
               const SizedBox(width: 16),
-              OutOfScope(
-                label: '메뉴',
+              GestureDetector(
+                behavior: HitTestBehavior.opaque,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const A1Menu()),
+                ),
                 child: const Icon(Icons.menu, size: 26, color: Color(0xFF2A2A2E)),
               ),
             ],
@@ -337,7 +343,15 @@ class _A1KbHomeState extends State<A1KbHome> {
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: KbButton(label: '이체', onTap: () => showOutOfScope(context, '이체'))),
+              Expanded(
+                child: KbButton(
+                  label: '이체',
+                  onTap: () => Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => const A1TransferEntry()),
+                  ),
+                ),
+              ),
               const SizedBox(width: 10),
               Expanded(
                 child: KbButton(
