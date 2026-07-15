@@ -43,3 +43,8 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# 재현 근거용 실제 앱 캡처 — 본인 계좌번호·잔액·실명이 찍혀 있어 커밋하지 않는다.
+# (연구 원칙: 실거래·실제 금융정보 0). 안내는 docs/screenshots/README.md 참고.
+docs/screenshots/**
+!docs/screenshots/README.md
