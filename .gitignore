@@ -33,6 +33,9 @@ migrate_working_dir/
 /build/
 /coverage/
 
+# flutter run 중 s 키로 찍은 스크린샷 (flutter_01.png, flutter_02.png …)
+/flutter_*.png
+
 # Symbolication related
 app.*.symbols
 
