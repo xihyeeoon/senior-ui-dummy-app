@@ -3,6 +3,25 @@ import 'package:flutter/material.dart';
 import '../data/sh_menu_data.dart';
 import '../theme/sh_theme.dart';
 import '../widgets/sh_common.dart';
+import 'a1_bill_home.dart';
+import 'a1_transfer_entry.dart';
+import 'sh_menu_search.dart';
+
+/// 과제 경로 항목만 실제 화면으로 연결한다. 나머지는 [showOutOfScope].
+/// 전체메뉴 리스트와 메뉴 검색이 공유한다.
+final _shMenuRoutes = <String, WidgetBuilder>{
+  '계좌이체': (_) => const A1TransferEntry(),
+  '납부하기': (_) => const A1BillHome(),
+};
+
+void openShMenuItem(BuildContext context, String label) {
+  final builder = _shMenuRoutes[label];
+  if (builder != null) {
+    Navigator.push(context, MaterialPageRoute(builder: builder));
+  } else {
+    showOutOfScope(context, label);
+  }
+}
 
 /// 신한 SOL뱅킹 전체 메뉴 (A1·A2 공유 — 고령자/일반 메뉴 동일).
 /// 근거: docs/screenshots/02_메뉴/ (43장). 데이터: [shMenu].
@@ -146,8 +165,10 @@ class _ShMenuState extends State<ShMenu> {
   }
 
   Widget _searchBar() {
-    return OutOfScope(
-      label: '검색',
+    return GestureDetector(
+      behavior: HitTestBehavior.opaque,
+      onTap: () => Navigator.push(
+          context, MaterialPageRoute(builder: (_) => const ShMenuSearch())),
       child: Container(
         margin: const EdgeInsets.fromLTRB(16, 6, 16, 10),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 15),
@@ -315,7 +336,7 @@ class _ShMenuState extends State<ShMenu> {
   Widget _item(String label) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => showOutOfScope(context, label),
+      onTap: () => openShMenuItem(context, label),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15),
         child: Text(label, style: const TextStyle(fontSize: 19, fontWeight: FontWeight.w600)),

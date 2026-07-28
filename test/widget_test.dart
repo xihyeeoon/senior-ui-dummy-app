@@ -93,7 +93,7 @@ void main() {
     expect(find.text('세금/공과금'), findsWidgets);
   });
 
-  testWidgets('신한 메뉴: 세금/공과금 칩으로 납부하기까지 이동한다',
+  testWidgets('신한 메뉴: 세금/공과금 납부하기로 공과금 메인에 진입한다',
       (WidgetTester tester) async {
     await tester.pumpWidget(const MaterialApp(home: ShMenu()));
     await tester.pumpAndSettle();
@@ -109,6 +109,56 @@ void main() {
           .first,
     );
     expect(find.text('납부하기'), findsOneWidget); // 과제1 진입 항목
+
+    // 스크롤 직후엔 화면 하단에 걸쳐 탭 중심이 화면 밖일 수 있어 먼저 당긴다.
+    await tester.ensureVisible(find.text('납부하기'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('납부하기'));
+    await tester.pumpAndSettle();
+
+    // 신한 세금/공과금 메인 진입 확인(엔트리 카드는 상단이라 지연로딩 무관)
+    expect(find.text('조회하기'), findsOneWidget);
+    expect(find.text('종이고지서 번호로 바로 납부'), findsOneWidget);
+  });
+
+  testWidgets('메뉴 검색: 항목을 입력해 결과로 이동한다', (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: ShMenu()));
+    await tester.pumpAndSettle();
+
+    // 상단 검색바 → 검색 화면
+    await tester.tap(find.text('상품, 메뉴, 혜택 등을 검색해보세요'));
+    await tester.pumpAndSettle();
+
+    // '이체' 입력 → 계좌이체 결과 노출
+    await tester.enterText(find.byType(TextField), '이체');
+    await tester.pumpAndSettle();
+    expect(find.text('계좌이체'), findsWidgets);
+
+    // 섹션명으로도 검색된다: '공과금' → 세금/공과금 › 납부하기
+    await tester.enterText(find.byType(TextField), '공과금');
+    await tester.pumpAndSettle();
+    expect(find.text('납부하기'), findsWidgets);
+
+    // 결과 탭 → 실제 화면 이동(납부하기 → 공과금 메인)
+    await tester.tap(find.text('납부하기').first);
+    await tester.pumpAndSettle();
+    expect(find.text('조회하기'), findsOneWidget);
+  });
+
+  testWidgets('메뉴 검색: 조합 중간 입력(ㄱ,공,공ㄱ,공과…)도 결과에 걸린다',
+      (WidgetTester tester) async {
+    _useTallPhone(tester); // 브로드 쿼리는 결과가 많아 지연 리스트 밖으로 밀리지 않게
+    await tester.pumpWidget(const MaterialApp(home: ShMenu()));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('상품, 메뉴, 혜택 등을 검색해보세요'));
+    await tester.pumpAndSettle();
+
+    // "공과금"을 조합해가는 각 단계에서 세금/공과금 › 납부하기가 계속 잡혀야 한다.
+    for (final step in ['ㄱ', '고', '공', '공ㄱ', '공과', '공과ㄱ', '공과그', '공과금']) {
+      await tester.enterText(find.byType(TextField), step);
+      await tester.pumpAndSettle();
+      expect(find.text('납부하기'), findsWidgets, reason: '"$step" 단계에서 결과 없음');
+    }
   });
 
   testWidgets('입력란을 탭하면 키패드가 열리고 숫자가 입력된다',
