@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../theme/kb_theme.dart';
-import '../widgets/kb_common.dart';
+import '../theme/sh_theme.dart';
+import '../widgets/sh_common.dart';
 
 /// A2 · KB스타뱅킹 간편홈(배포 단순화/고령자 모드) 재현
 /// 실제 앱의 '간편홈 ON' 상태를 충실히 재현. 계좌 데이터는 더미.
@@ -13,16 +13,16 @@ class A2KbHome extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: KbColors.bg,
+      backgroundColor: ShColors.bg,
       body: Column(
         children: [
-          const KbDevBar(label: 'A2 · 간편홈(단순화 모드) 재현 · 더미'),
+          const ShDevBar(label: 'A2 · 간편홈(단순화 모드) 재현 · 더미'),
           Expanded(
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const KbStatusBar(),
+                  const ShStatusBar(),
                   _header(context),
                   _userRow(context),
                   _accountCard(context),
@@ -62,7 +62,7 @@ class A2KbHome extends StatelessWidget {
                   width: 54,
                   height: 28,
                   decoration: BoxDecoration(
-                    color: KbColors.yellow,
+                    color: ShColors.yellow,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: Stack(
@@ -126,7 +126,7 @@ class A2KbHome extends StatelessWidget {
                       width: 40,
                       height: 30,
                       decoration: BoxDecoration(
-                        color: KbColors.yellow,
+                        color: ShColors.yellow,
                         borderRadius: BorderRadius.circular(8),
                       ),
                     ),
@@ -137,9 +137,9 @@ class A2KbHome extends StatelessWidget {
                         width: 16,
                         height: 16,
                         decoration: BoxDecoration(
-                          color: KbColors.green,
+                          color: ShColors.green,
                           shape: BoxShape.circle,
-                          border: Border.all(color: KbColors.bg, width: 2),
+                          border: Border.all(color: ShColors.bg, width: 2),
                         ),
                         child: const Icon(Icons.check, size: 9, color: Colors.white),
                       ),
@@ -148,9 +148,9 @@ class A2KbHome extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 10),
-              const Text('홍길동님', style: KbText.name),
+              const Text('홍길동님', style: ShText.name),
               const SizedBox(width: 4),
-              const Text('›', style: TextStyle(fontSize: 18, color: KbColors.gray)),
+              const Text('›', style: TextStyle(fontSize: 18, color: ShColors.gray)),
             ],
           ),
           Container(
@@ -158,7 +158,7 @@ class A2KbHome extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(999),
-              border: Border.all(color: KbColors.line),
+              border: Border.all(color: ShColors.line),
             ),
             child: Row(
               children: [
@@ -167,7 +167,7 @@ class A2KbHome extends StatelessWidget {
                   height: 18,
                   alignment: Alignment.center,
                   decoration:
-                      const BoxDecoration(color: KbColors.green, shape: BoxShape.circle),
+                      const BoxDecoration(color: ShColors.green, shape: BoxShape.circle),
                   child: const Text('F',
                       style: TextStyle(
                           color: Colors.white,
@@ -186,10 +186,10 @@ class A2KbHome extends StatelessWidget {
 
   Widget _accountCard(BuildContext context) {
     return Container(
-      margin: KbGap.screenPad,
+      margin: ShGap.screenPad,
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: KbColors.card,
+        color: ShColors.card,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -205,7 +205,7 @@ class A2KbHome extends StatelessWidget {
                     color: Color(0xFF6B5B4A), shape: BoxShape.circle),
                 child: const Text('★',
                     style: TextStyle(
-                        color: KbColors.yellow,
+                        color: ShColors.yellow,
                         fontWeight: FontWeight.w800,
                         fontSize: 15)),
               ),
@@ -213,7 +213,7 @@ class A2KbHome extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                    color: KbColors.badge, borderRadius: BorderRadius.circular(6)),
+                    color: ShColors.badge, borderRadius: BorderRadius.circular(6)),
                 child: const Text('한도제한계좌',
                     style: TextStyle(
                         fontSize: 13,
@@ -221,7 +221,7 @@ class A2KbHome extends StatelessWidget {
                         fontWeight: FontWeight.w600)),
               ),
               const SizedBox(width: 8),
-              const Expanded(child: Text('KB마이핏통장', style: KbText.cardTitle)),
+              const Expanded(child: Text('KB마이핏통장', style: ShText.cardTitle)),
               const Icon(Icons.more_vert, color: Color(0xFF9A9A9F)),
             ],
           ),
@@ -237,13 +237,13 @@ class A2KbHome extends StatelessWidget {
           const SizedBox(height: 44),
           Row(
             children: [
-              const Text('12,500원', style: KbText.balance),
+              const Text('12,500원', style: ShText.balance),
               const SizedBox(width: 10),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: KbColors.line),
+                  border: Border.all(color: ShColors.line),
                 ),
                 child: const Text('숨김',
                     style: TextStyle(fontSize: 14, color: Color(0xFF6A6A6F))),
@@ -254,14 +254,14 @@ class A2KbHome extends StatelessWidget {
           Row(
             children: [
               Expanded(
-                child: KbButton(
+                child: ShButton(
                   label: '이체',
                   onTap: () => showOutOfScope(context, '이체'),
                 ),
               ),
               const SizedBox(width: 12),
               Expanded(
-                child: KbButton(
+                child: ShButton(
                   label: '전용화면',
                   primary: false,
                   onTap: () => showOutOfScope(context, '전용화면'),
@@ -310,7 +310,7 @@ class A2KbHome extends StatelessWidget {
         margin: const EdgeInsets.fromLTRB(20, 4, 20, 14),
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: KbColors.card,
+          color: ShColors.card,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -333,7 +333,7 @@ class A2KbHome extends StatelessWidget {
                   Text('은행가서 기다리지 않는 방법',
                       style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
                   SizedBox(height: 3),
-                  Text('번호표 미리 뽑기', style: KbText.sub),
+                  Text('번호표 미리 뽑기', style: ShText.sub),
                 ],
               ),
             ),
@@ -348,10 +348,10 @@ class A2KbHome extends StatelessWidget {
     return OutOfScope(
       label: '통합거래내역',
       child: Container(
-        margin: KbGap.screenPad,
+        margin: ShGap.screenPad,
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
-          color: KbColors.card,
+          color: ShColors.card,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -389,7 +389,7 @@ class A2KbHome extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                   decoration: BoxDecoration(
-                    color: KbColors.darkBar,
+                    color: ShColors.darkBar,
                     borderRadius: BorderRadius.circular(999),
                   ),
                   child: const Text('매일 랜덤P',
@@ -417,7 +417,7 @@ class A2KbHome extends StatelessWidget {
           ),
         );
     return Container(
-      color: KbColors.darkBar,
+      color: ShColors.darkBar,
       padding: const EdgeInsets.symmetric(vertical: 14),
       child: Row(
         children: [
@@ -455,12 +455,12 @@ class A2KbHome extends StatelessWidget {
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(it.$1, size: 24, color: active ? KbColors.dark : KbColors.gray),
+                  Icon(it.$1, size: 24, color: active ? ShColors.dark : ShColors.gray),
                   const SizedBox(height: 3),
                   Text(it.$2,
                       style: TextStyle(
                           fontSize: 12,
-                          color: active ? KbColors.dark : KbColors.gray)),
+                          color: active ? ShColors.dark : ShColors.gray)),
                 ],
               ),
             ),

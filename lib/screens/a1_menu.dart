@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../theme/kb_theme.dart';
-import '../widgets/kb_common.dart';
+import '../theme/sh_theme.dart';
+import '../widgets/sh_common.dart';
 import 'a1_bill_main.dart';
 import 'a1_transfer_entry.dart';
 
@@ -116,8 +116,8 @@ class _A1MenuState extends State<A1Menu> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          const KbDevBar(label: 'A1 · 전체메뉴 재현 · 더미'),
-          const KbStatusBar(),
+          const ShDevBar(label: 'A1 · 전체메뉴 재현 · 더미'),
+          const ShStatusBar(),
           _topBar(),
           if (_showChips) _chipBar(),
           Expanded(
@@ -164,13 +164,13 @@ class _A1MenuState extends State<A1Menu> {
             children: [
               OutOfScope(
                 label: '검색',
-                child: const Icon(Icons.search, size: 28, color: KbColors.dark),
+                child: const Icon(Icons.search, size: 28, color: ShColors.dark),
               ),
               const SizedBox(width: 18),
               GestureDetector(
                 behavior: HitTestBehavior.opaque,
                 onTap: () => Navigator.of(context).maybePop(),
-                child: const Icon(Icons.close, size: 28, color: KbColors.dark),
+                child: const Icon(Icons.close, size: 28, color: ShColors.dark),
               ),
             ],
           ),
@@ -256,7 +256,7 @@ class _A1MenuState extends State<A1Menu> {
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 11),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: KbColors.line),
+          border: Border.all(color: ShColors.line),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -319,14 +319,14 @@ class _A1MenuState extends State<A1Menu> {
               color: active ? const Color(0xFF3A3D44) : Colors.white,
               borderRadius: BorderRadius.circular(999),
               border: Border.all(
-                  color: active ? const Color(0xFF3A3D44) : KbColors.line),
+                  color: active ? const Color(0xFF3A3D44) : ShColors.line),
             ),
             child: Text(
               title,
               style: TextStyle(
                 fontSize: 17,
                 fontWeight: active ? FontWeight.w700 : FontWeight.w400,
-                color: active ? Colors.white : KbColors.dark,
+                color: active ? Colors.white : ShColors.dark,
               ),
             ),
           ),
@@ -480,7 +480,7 @@ class _SectionIcon extends StatelessWidget {
         height: 22,
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: KbColors.yellow,
+          color: ShColors.yellow,
           borderRadius: BorderRadius.circular(4),
         ),
         child: const Text('KB',
@@ -554,7 +554,7 @@ const _sections = <_Section>[
   _Section(
     '상품가입/관리',
     icon: Icons.star,
-    iconBg: KbColors.yellow,
+    iconBg: ShColors.yellow,
     hasChip: false,
     grid: [
       '추천상품', '예적금', '대출', '입출금',

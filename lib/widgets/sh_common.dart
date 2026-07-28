@@ -1,6 +1,16 @@
 import 'package:flutter/material.dart';
 
-import '../theme/kb_theme.dart';
+import '../theme/sh_theme.dart';
+
+/// 조건(A1/A2) 홈 라우트 이름. 랜딩에서 홈을 push할 때 부여한다(main.dart).
+const kConditionHomeRoute = 'condition-home';
+
+/// 이체 완료/닫기 시 랜딩(첫 화면)이 아니라 시작한 조건 홈으로 되돌린다.
+/// 홈 라우트를 못 찾으면 첫 화면까지만 pop(안전장치).
+void popToConditionHome(BuildContext context) {
+  Navigator.of(context)
+      .popUntil((r) => r.settings.name == kConditionHomeRoute || r.isFirst);
+}
 
 /// 실험 범위 밖 탭 처리.
 /// 참가자가 과제와 무관한 요소를 눌러도 앱이 안 깨지게 가벼운 피드백만 준다.
@@ -36,8 +46,8 @@ class OutOfScope extends StatelessWidget {
 }
 
 /// 상단 상태바 (4:31 / 신호 / 배터리) — 재현용.
-class KbStatusBar extends StatelessWidget {
-  const KbStatusBar({super.key});
+class ShStatusBar extends StatelessWidget {
+  const ShStatusBar({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -63,14 +73,14 @@ class KbStatusBar extends StatelessWidget {
 }
 
 /// 개발용 상단 바 (뒤로가기 + 라벨). 실제 실험 빌드에서는 제거.
-class KbDevBar extends StatelessWidget {
+class ShDevBar extends StatelessWidget {
   final String label;
-  const KbDevBar({super.key, required this.label});
+  const ShDevBar({super.key, required this.label});
 
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: KbColors.devBar,
+      color: ShColors.devBar,
       child: SafeArea(
         bottom: false,
         child: SizedBox(
@@ -94,9 +104,9 @@ class KbDevBar extends StatelessWidget {
 
 /// KB 내부 화면 공통 앱바: `‹ 제목            🏠 ☰`
 /// 근거: 공과금 납부/조회·촬영납부·전기요금 납부 화면 캡처에서 동일 패턴.
-class KbAppBar extends StatelessWidget {
+class ShAppBar extends StatelessWidget {
   final String title;
-  const KbAppBar({super.key, required this.title});
+  const ShAppBar({super.key, required this.title});
 
   @override
   Widget build(BuildContext context) {
@@ -109,7 +119,7 @@ class KbAppBar extends StatelessWidget {
             onTap: () => Navigator.of(context).maybePop(),
             child: const Padding(
               padding: EdgeInsets.only(right: 6),
-              child: Icon(Icons.arrow_back_ios_new, size: 22, color: KbColors.dark),
+              child: Icon(Icons.arrow_back_ios_new, size: 22, color: ShColors.dark),
             ),
           ),
           Expanded(
@@ -118,12 +128,12 @@ class KbAppBar extends StatelessWidget {
           ),
           OutOfScope(
             label: '홈',
-            child: const Icon(Icons.home_outlined, size: 27, color: KbColors.dark),
+            child: const Icon(Icons.home_outlined, size: 27, color: ShColors.dark),
           ),
           const SizedBox(width: 16),
           OutOfScope(
             label: '메뉴',
-            child: const Icon(Icons.menu, size: 27, color: KbColors.dark),
+            child: const Icon(Icons.menu, size: 27, color: ShColors.dark),
           ),
         ],
       ),
@@ -131,12 +141,57 @@ class KbAppBar extends StatelessWidget {
   }
 }
 
+/// 은행 로고 자리 — 실제 앱은 각 은행 CI. 더미에서는 은행별 색 원 + 이니셜로
+/// 근사한다(v6 §4.5 아이콘 근사 허용). 이체 목록·확인 화면 공용.
+class ShBankMark extends StatelessWidget {
+  final String bank;
+  final double size;
+  const ShBankMark(this.bank, {super.key, this.size = 44});
+
+  static const _map = {
+    '카카오뱅크': [Color(0xFFFFE300), Color(0xFF2B2B2B), '카'],
+    '신한': [Color(0xFF0046D6), Colors.white, '신'],
+    '신한투자증권': [Color(0xFF0046D6), Colors.white, '신'],
+    '제주': [Color(0xFF0046D6), Colors.white, '제'],
+    '농협': [Color(0xFF1F8B3F), Colors.white, 'N'],
+    '토스뱅크': [Color(0xFF3182F6), Colors.white, 'T'],
+    '토스증권': [Color(0xFF3182F6), Colors.white, 'T'],
+    '국민': [Color(0xFF6A5B3E), Color(0xFFFFCC00), 'K'],
+    'KB국민': [Color(0xFFFFCC00), Color(0xFF2B2B2B), 'K'],
+    'KB증권': [Color(0xFF6A5B3E), Color(0xFFFFCC00), 'K'],
+  };
+
+  /// 미매핑 은행은 이름 해시로 색을 결정(그리드가 밋밋해지지 않게).
+  static const _palette = [
+    Color(0xFF2A6BF2), Color(0xFF1F8B3F), Color(0xFFE8506B), Color(0xFF6A5AE0),
+    Color(0xFFE8802B), Color(0xFF2FA7A0), Color(0xFFB8455F), Color(0xFF3B6FB0),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final spec = _map[bank];
+    final hash = bank.codeUnits.fold<int>(0, (a, b) => a + b);
+    final bg = (spec?[0] as Color?) ?? _palette[hash % _palette.length];
+    final fg = (spec?[1] as Color?) ?? Colors.white;
+    final label = (spec?[2] as String?) ?? (bank.isNotEmpty ? bank[0] : '·');
+    return Container(
+      width: size,
+      height: size,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(color: bg, shape: BoxShape.circle),
+      child: Text(label,
+          style: TextStyle(
+              color: fg, fontSize: size * 0.42, fontWeight: FontWeight.w800)),
+    );
+  }
+}
+
 /// KB 스타일 큰 버튼 (노랑=주요 / 회색=보조).
-class KbButton extends StatelessWidget {
+class ShButton extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
   final bool primary;
-  const KbButton({
+  const ShButton({
     super.key,
     required this.label,
     required this.onTap,
@@ -152,13 +207,13 @@ class KbButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 16),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: primary ? KbColors.yellow : KbColors.badge,
+          color: primary ? ShColors.yellow : ShColors.badge,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Text(
           label,
-          style: KbText.button.copyWith(
-            color: primary ? KbColors.dark : const Color(0xFF3A3A3E),
+          style: ShText.button.copyWith(
+            color: primary ? ShColors.dark : const Color(0xFF3A3A3E),
           ),
         ),
       ),

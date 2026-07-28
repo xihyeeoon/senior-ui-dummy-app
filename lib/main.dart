@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
-import 'screens/a1_kb_home.dart';
-import 'screens/a2_kb_home.dart';
+import 'screens/a1_home.dart';
+import 'screens/a2_home.dart';
+import 'widgets/sh_common.dart';
 
 void main() => runApp(const DummyApp());
 
@@ -41,16 +42,16 @@ class LandingPage extends StatelessWidget {
           _conditionCard(
             context,
             tag: 'A1',
-            title: '원본 재현 · 기본 홈',
-            desc: 'KB스타뱅킹 기본 홈(간편홈 OFF) 충실 재현 (바닥 baseline)',
-            page: const A1KbHome(),
+            title: '원본 재현 · 신한 일반 홈',
+            desc: '신한 SOL뱅킹 일반 홈 충실 재현 (바닥 baseline)',
+            page: const A1Home(),
           ),
           _conditionCard(
             context,
             tag: 'A2',
-            title: '간편홈(단순화 모드)',
-            desc: 'KB 간편홈 = 배포된 단순화 모드 (배포 현실 baseline)',
-            page: const A2KbHome(),
+            title: '쉬운홈(고령자 모드)',
+            desc: '신한 쉬운홈 = 배포된 고령자 모드 (배포 현실 baseline · 구현 전)',
+            page: const A2Home(),
           ),
           _conditionCard(
             context,
@@ -79,7 +80,12 @@ class LandingPage extends StatelessWidget {
         borderRadius: BorderRadius.circular(16),
         onTap: () => Navigator.push(
           context,
-          MaterialPageRoute(builder: (_) => page),
+          MaterialPageRoute(
+            builder: (_) => page,
+            // 조건 홈 라우트에 이름을 붙여, 이체 완료/닫기 시 랜딩이 아니라
+            // 이 홈으로 돌아오게 한다([popToConditionHome]).
+            settings: const RouteSettings(name: kConditionHomeRoute),
+          ),
         ),
         child: Padding(
           padding: const EdgeInsets.all(18),

@@ -1,0 +1,45 @@
+/// 더미 데이터 한 곳 모음.
+///
+/// 연구 원칙: 실거래·실제 금융정보 0 (`README.md`).
+/// 근거 캡처에는 실명·실계좌·실잔액이 찍혀 있으나 전부 여기 값으로 치환한다.
+/// 계좌번호는 실제 계좌로 오인되지 않도록 0 패턴을 쓴다.
+class ShDummy {
+  // ---- 본인 (더미) ----
+  static const myName = '홍길동';
+
+  /// 출금계좌(상품명은 개인정보가 아니라 충실도를 위해 캡처 그대로 둔다).
+  static const myAccountName = '[금융거래한도계좌2]신한 주거래 우대통장';
+  static const myAccountType = '(저축예금)';
+  static const myBank = '신한';
+  static const myAccountNo = '110-000-000000';
+
+  /// 이체 금액 화면의 출금가능금액. 명백한 더미 값(라운드 넘버).
+  static const balance = 1000000;
+  static const balanceText = '1,000,000원';
+
+  /// 과제 대상 상대의 예금주명(더미). 계좌·은행은 진입 화면에서 직접 입력.
+  static const taskPayee =
+      ShPayee(name: '김철수', bank: '신한', accountNo: '110-000-000000');
+
+  // ---- 하위호환(휴면 화면 참조) ----
+  static const payeeName = '김철수';
+  static const payeeBank = '카카오뱅크';
+  static const payeeBankFull = '카카오뱅크';
+  static const payeeAccountNo = '3333-00-0000000';
+  static const payeeAccountNoPlain = '333300000000';
+}
+
+/// 이체 상대 한 명. 진입 → 금액 → 확인 → 완료로 그대로 전달된다.
+class ShPayee {
+  final String name;
+  final String bank;
+  final String accountNo; // 하이픈 표기
+  final bool favorite;
+
+  const ShPayee({
+    required this.name,
+    required this.bank,
+    required this.accountNo,
+    this.favorite = false,
+  });
+}

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../theme/kb_theme.dart';
-import '../widgets/kb_common.dart';
+import '../theme/sh_theme.dart';
+import '../widgets/sh_common.dart';
 import 'a1_bill_input.dart';
 
 /// A1 · 공과금 납부/조회 (메인)
@@ -20,9 +20,9 @@ class A1BillMain extends StatelessWidget {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          const KbDevBar(label: 'A1 · 공과금 납부/조회 · 더미'),
-          const KbStatusBar(),
-          const KbAppBar(title: '공과금 납부/조회'),
+          const ShDevBar(label: 'A1 · 공과금 납부/조회 · 더미'),
+          const ShStatusBar(),
+          const ShAppBar(title: '공과금 납부/조회'),
           _tabs(context),
           Expanded(
             child: ListView(
@@ -254,7 +254,7 @@ class A1BillMain extends StatelessWidget {
           alignment: Alignment.center,
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: KbColors.line),
+            border: Border.all(color: ShColors.line),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -278,7 +278,7 @@ class A1BillMain extends StatelessWidget {
               alignment: Alignment.center,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(10),
-                border: Border.all(color: KbColors.line),
+                border: Border.all(color: ShColors.line),
               ),
               child: Text(label, style: const TextStyle(fontSize: 18)),
             ),

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 
-import '../theme/kb_theme.dart';
-import '../widgets/kb_common.dart';
-import '../widgets/kb_number_keypad.dart';
+import '../theme/sh_theme.dart';
+import '../widgets/sh_common.dart';
+import '../widgets/sh_number_keypad.dart';
 
 /// A1 · 전기요금/TV수신료 납부 — 전자납부번호 입력
 /// 근거: docs/screenshots/a1/02_bill_type/기본_공과금-세부(1).png
@@ -12,7 +12,7 @@ import '../widgets/kb_number_keypad.dart';
 /// [미확인 — 캡처 대기]
 /// 1. 입력란을 탭했을 때 뜨는 키패드를 직접 캡처하지 못했다(캡처는 키패드가 닫힌 상태만).
 ///    다만 같은 성격의 숫자 입력인 이체 금액 화면(transfer/기본_이체(2).png)이
-///    **배열이 고정된 일반 키패드**를 쓰므로 [KbNumberKeypad]를 채택한다.
+///    **배열이 고정된 일반 키패드**를 쓰므로 [ShNumberKeypad]를 채택한다.
 ///    전자납부번호는 비밀번호가 아니라 보안 키패드(숫자 섞임)를 쓸 이유가 없다.
 ///    → 근거는 있으나 이 화면 자체의 캡처는 아니므로 확인 시 정정할 것.
 /// 2. [조회] 버튼의 **활성** 상태 색을 알 수 없다(캡처는 비활성만). KB 주색인 노랑으로 둔다.
@@ -50,9 +50,9 @@ class _A1BillInputState extends State<A1BillInput> {
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          const KbDevBar(label: 'A1 · 전기요금/TV수신료 납부 · 더미'),
-          const KbStatusBar(),
-          const KbAppBar(title: '전기요금/TV수신료 납부'),
+          const ShDevBar(label: 'A1 · 전기요금/TV수신료 납부 · 더미'),
+          const ShStatusBar(),
+          const ShAppBar(title: '전기요금/TV수신료 납부'),
           Expanded(
             child: ListView(
               padding: const EdgeInsets.fromLTRB(20, 14, 20, 20),
@@ -66,7 +66,7 @@ class _A1BillInputState extends State<A1BillInput> {
             ),
           ),
           if (_keypadOpen)
-            KbNumberKeypad(onDigit: _onDigit, onDelete: _onDelete),
+            ShNumberKeypad(onDigit: _onDigit, onDelete: _onDelete),
         ],
       ),
     );
@@ -89,7 +89,7 @@ class _A1BillInputState extends State<A1BillInput> {
               fontSize: 26,
               fontWeight: FontWeight.w700,
               letterSpacing: _value.isEmpty ? 0 : 1.5,
-              color: _value.isEmpty ? const Color(0xFF9A9EA6) : KbColors.dark,
+              color: _value.isEmpty ? const Color(0xFF9A9EA6) : ShColors.dark,
             ),
           ),
           const SizedBox(height: 10),
@@ -110,7 +110,7 @@ class _A1BillInputState extends State<A1BillInput> {
         padding: const EdgeInsets.symmetric(vertical: 19),
         alignment: Alignment.center,
         decoration: BoxDecoration(
-          color: _canQuery ? KbColors.yellow : const Color(0xFFE4E7EB),
+          color: _canQuery ? ShColors.yellow : const Color(0xFFE4E7EB),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
@@ -118,7 +118,7 @@ class _A1BillInputState extends State<A1BillInput> {
           style: TextStyle(
             fontSize: 19,
             fontWeight: FontWeight.w600,
-            color: _canQuery ? KbColors.dark : const Color(0xFF9A9EA6),
+            color: _canQuery ? ShColors.dark : const Color(0xFF9A9EA6),
           ),
         ),
       ),

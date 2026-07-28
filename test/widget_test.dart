@@ -3,32 +3,112 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:senior_ui_dummy_app/data/kb_dummy.dart';
+import 'package:senior_ui_dummy_app/data/sh_dummy.dart';
 import 'package:senior_ui_dummy_app/main.dart';
 import 'package:senior_ui_dummy_app/screens/a1_bill_input.dart';
+import 'package:senior_ui_dummy_app/screens/a1_kb_home.dart';
 import 'package:senior_ui_dummy_app/screens/a1_bill_main.dart';
 import 'package:senior_ui_dummy_app/screens/a1_menu.dart';
 import 'package:senior_ui_dummy_app/screens/a1_transfer_amount.dart';
 import 'package:senior_ui_dummy_app/screens/a1_transfer_entry.dart';
-import 'package:senior_ui_dummy_app/theme/kb_theme.dart';
+import 'package:senior_ui_dummy_app/screens/sh_menu.dart';
+import 'package:senior_ui_dummy_app/theme/sh_theme.dart';
+import 'package:senior_ui_dummy_app/widgets/sh_number_keypad.dart';
+
+/// 키패드 범위로 한정해 숫자 키를 탭한다(필드에 찍힌 숫자와의 혼동 방지).
+Finder _keypadKey(String d) =>
+    find.descendant(of: find.byType(ShNumberKeypad), matching: find.text(d));
+
+/// 이체 진입 화면은 세로가 길어 기본 테스트 창(800×600)에선 드롭다운·칩이
+/// 화면 밖으로 밀린다. 실제 폰 크기 창으로 렌더링해 모든 요소를 탭 가능하게 한다.
+void _useTallPhone(WidgetTester tester) {
+  tester.view.physicalSize = const Size(1179, 2556);
+  tester.view.devicePixelRatio = 1.0;
+  addTearDown(tester.view.resetPhysicalSize);
+  addTearDown(tester.view.resetDevicePixelRatio);
+}
 
 void main() {
   testWidgets('랜딩 화면에 A1/A2/C 조건이 보인다', (WidgetTester tester) async {
     await tester.pumpWidget(const DummyApp());
 
-    expect(find.text('원본 재현 · 기본 홈'), findsOneWidget);
-    expect(find.text('간편홈(단순화 모드)'), findsOneWidget);
+    expect(find.text('원본 재현 · 신한 일반 홈'), findsOneWidget);
+    expect(find.text('쉬운홈(고령자 모드)'), findsOneWidget);
     expect(find.text('도구 재설계'), findsOneWidget);
   });
 
-  testWidgets('A1 카드를 누르면 기본 홈이 열린다', (WidgetTester tester) async {
+  testWidgets('A1 카드를 누르면 신한 일반 홈이 열린다', (WidgetTester tester) async {
     await tester.pumpWidget(const DummyApp());
 
-    await tester.tap(find.text('원본 재현 · 기본 홈'));
+    await tester.tap(find.text('원본 재현 · 신한 일반 홈'));
     await tester.pumpAndSettle();
 
-    expect(find.text('홍길동님'), findsOneWidget); // 기본 홈 헤더
-    expect(find.text('KB마이핏통장'), findsOneWidget); // 계좌 캐러셀 첫 카드
+    expect(find.text('${ShDummy.myName}님'), findsOneWidget); // 헤더 (더미 이름)
+    expect(find.text('자산'), findsOneWidget); // 상단 자산 카드 (이체 진입)
+  });
+
+  testWidgets('A2 카드는 신한 쉬운홈을 연다', (WidgetTester tester) async {
+    await tester.pumpWidget(const DummyApp());
+
+    await tester.tap(find.text('쉬운홈(고령자 모드)'));
+    await tester.pumpAndSettle();
+
+    // 쉬운홈 고유: 이체가 '돈보내기'(쉬운 말)로 표기된다.
+    expect(find.text('돈보내기'), findsOneWidget);
+  });
+
+  testWidgets('A1 홈 상단 아이콘으로 전체메뉴에 진입한다', (WidgetTester tester) async {
+    await tester.pumpWidget(const DummyApp());
+    await tester.tap(find.text('원본 재현 · 신한 일반 홈'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.manage_search)); // 상단 우측 전체메뉴 아이콘(줄+돋보기)
+    await tester.pumpAndSettle();
+
+    expect(find.text('전체계좌 조회'), findsOneWidget); // 메뉴 은행 › 조회/관리
+  });
+
+  testWidgets('A2 쉬운홈 상단 메뉴 아이콘으로 전체메뉴에 진입한다',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const DummyApp());
+    await tester.tap(find.text('쉬운홈(고령자 모드)'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byIcon(Icons.manage_search));
+    await tester.pumpAndSettle();
+
+    expect(find.text('전체계좌 조회'), findsOneWidget); // 동일 공유 메뉴
+  });
+
+  // 메뉴는 A1·A2 공유. 진입 직후 은행 탭 상단(조회/관리)이 보인다.
+  testWidgets('신한 메뉴: 대분류 탭과 은행 조회/관리가 보인다',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: ShMenu()));
+    await tester.pumpAndSettle();
+
+    expect(find.text('은행'), findsWidgets); // 탭 + 카테고리 제목
+    expect(find.text('전체계좌 조회'), findsOneWidget); // 은행 › 조회/관리 첫 항목
+    // 과제 경로 소분류가 존재
+    expect(find.text('이체'), findsWidgets);
+    expect(find.text('세금/공과금'), findsWidgets);
+  });
+
+  testWidgets('신한 메뉴: 세금/공과금 칩으로 납부하기까지 이동한다',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: ShMenu()));
+    await tester.pumpAndSettle();
+
+    await tester.scrollUntilVisible(
+      find.text('납부하기'),
+      400,
+      scrollable: find
+          .descendant(
+            of: find.byKey(const ValueKey('shMenuList')),
+            matching: find.byType(Scrollable),
+          )
+          .first,
+    );
+    expect(find.text('납부하기'), findsOneWidget); // 과제1 진입 항목
   });
 
   testWidgets('입력란을 탭하면 키패드가 열리고 숫자가 입력된다',
@@ -53,9 +133,11 @@ void main() {
     expect(find.text('37'), findsOneWidget); // 입력 표시란
   });
 
-  testWidgets('기본 홈의 메뉴 아이콘으로 전체메뉴에 진입한다', (WidgetTester tester) async {
-    await tester.pumpWidget(const DummyApp());
-    await tester.tap(find.text('원본 재현 · 기본 홈'));
+  // KB 화면은 신한 전환으로 휴면 상태(트리 잔존, 랜딩 미연결). 신한 플로우 완성 시
+  // 히스토리로 보낸다. 그 전까지 KB 홈을 직접 띄워 기존 플로우 커버리지를 유지한다.
+  testWidgets('[KB·휴면] 기본 홈의 메뉴 아이콘으로 전체메뉴에 진입한다',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(const MaterialApp(home: A1KbHome()));
     await tester.pumpAndSettle();
 
     await tester.tap(find.byIcon(Icons.menu));
@@ -146,15 +228,14 @@ void main() {
 
     await tester.tap(find.text('9'));
     await tester.pump();
-    expect(_queryButtonColor(tester), KbColors.yellow); // 10자리 → 활성
+    expect(_queryButtonColor(tester), ShColors.yellow); // 10자리 → 활성
   });
 
   // ---- 과제 2: 이체 ----
 
-  testWidgets('기본 홈의 이체 버튼으로 이체 진입에 들어간다',
+  testWidgets('[KB·휴면] 기본 홈의 이체 버튼으로 이체 진입에 들어간다',
       (WidgetTester tester) async {
-    await tester.pumpWidget(const DummyApp());
-    await tester.tap(find.text('원본 재현 · 기본 홈'));
+    await tester.pumpWidget(const MaterialApp(home: A1KbHome()));
     await tester.pumpAndSettle();
 
     // 계좌 카드의 [이체]는 기본 화면 크기에서 접혀 있을 수 있다.
@@ -166,70 +247,114 @@ void main() {
     expect(find.text('누구에게 보낼까요?'), findsOneWidget);
   });
 
-  testWidgets('이체 전체 플로우: 상대 선택 → 금액 → 다음 → 이체 → 완료',
+  testWidgets('이체 전체 플로우: 계좌입력 → 은행선택 → 금액 → 보내기 → 비밀번호 → 완료',
       (WidgetTester tester) async {
+    _useTallPhone(tester);
     await tester.pumpWidget(const MaterialApp(home: A1TransferEntry()));
     await tester.pumpAndSettle();
 
-    // 1. 최근 목록에서 받는 사람 선택
-    await tester.tap(find.text(KbDummy.payeeName));
+    // 1. 계좌번호 직접 입력 — '110' 입력 시 신한 추천 칩이 뜬다
+    await tester.tap(_keypadKey('1'));
+    await tester.tap(_keypadKey('1'));
+    await tester.tap(_keypadKey('0'));
+    await tester.pump();
+    expect(find.text('신한'), findsWidgets);
+
+    // 2. 신한 칩으로 은행 선택 → [다음]
+    await tester.tap(find.text('신한').first);
+    await tester.pump();
+    await tester.tap(find.text('다음'));
     await tester.pumpAndSettle();
 
-    // 2. 금액 입력 (키패드 열린 상태로 시작)
-    expect(find.text('0원'), findsOneWidget);
-    await tester.tap(find.text('1'));
+    // 3. 금액 입력 — 시작은 '얼마를 보낼까요?' 플레이스홀더
+    expect(find.text('얼마를 보낼까요?'), findsOneWidget);
+    await tester.tap(_keypadKey('1'));
     await tester.pump();
     expect(find.text('1원'), findsOneWidget);
 
-    await tester.tap(find.text('확인'));
+    // 3. [다음] → 확인 화면 (질문 문구는 RichText)
+    await tester.tap(find.text('다음'));
+    await tester.pumpAndSettle();
+    expect(find.textContaining('보낼까요?', findRichText: true), findsOneWidget);
+    expect(find.text('수수료 무료'), findsOneWidget);
+
+    // 4. [보내기] → 계좌 비밀번호
+    await tester.tap(find.text('보내기'));
+    await tester.pumpAndSettle();
+    expect(find.text('계좌 비밀번호'), findsOneWidget);
+
+    // 5. 4자리 입력 → 완료 (파란 키패드에 0~9 모두 존재)
+    for (var i = 0; i < 4; i++) {
+      await tester.tap(find.text('7'));
+      await tester.pump();
+    }
+    await tester.pumpAndSettle(); // 완료 화면 전환(지연 타이머 소진)
+    expect(find.textContaining('보냈어요', findRichText: true), findsOneWidget);
+  });
+
+  // 요구사항: 계좌·은행이 모두 있어야 [다음]이 활성된다. 은행/증권사 시트로 선택.
+  testWidgets('이체 진입: 계좌·은행 모두 채워야 다음이 활성된다',
+      (WidgetTester tester) async {
+    _useTallPhone(tester);
+    await tester.pumpWidget(const MaterialApp(home: A1TransferEntry()));
     await tester.pumpAndSettle();
 
-    // 3. 키패드가 닫히면 상세 폼이 드러난다
-    expect(find.text('받는 분 통장 표시'), findsOneWidget);
-    expect(find.text('출금계좌'), findsOneWidget);
+    // 아무것도 없으면 다음을 눌러도 진행하지 않는다.
+    await tester.tap(find.text('다음'));
+    await tester.pumpAndSettle();
+    expect(find.text('누구에게 보낼까요?'), findsOneWidget);
+
+    // 은행/증권사 시트 열기 → 두 탭과 증권사 목록 확인
+    await tester.tap(find.text('은행 또는 증권사 선택').first);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('증권사'));
+    await tester.pumpAndSettle();
+    expect(find.text('신한투자증권'), findsOneWidget);
+
+    // 은행 탭에서 신한 선택 → 시트 닫힘
+    await tester.tap(find.text('은행'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('신한'));
+    await tester.pumpAndSettle();
+
+    // 계좌 한 자리 입력 후 다음 → 금액 화면으로 진행
+    await tester.tap(_keypadKey('1'));
+    await tester.pump();
+    await tester.tap(find.text('다음'));
+    await tester.pumpAndSettle();
+    expect(find.text('얼마를 보낼까요?'), findsOneWidget);
+  });
+
+  // 캡처 기준: 금액이 0원이면 [다음]이 비활성이라 확인으로 못 넘어간다.
+  testWidgets('금액이 0원이면 다음이 비활성이다', (WidgetTester tester) async {
+    await tester
+        .pumpWidget(const MaterialApp(home: A1TransferAmount(payee: ShDummy.taskPayee)));
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('다음'));
     await tester.pumpAndSettle();
 
-    // 4. 확인 바텀시트 — 금액만 볼드라 RichText다. find.text는 기본적으로
-    //    RichText를 보지 않으므로 findRichText를 켠다.
-    expect(find.textContaining('원을 이체합니다', findRichText: true),
-        findsOneWidget);
-
-    // 상단 라벨과 시트 버튼 둘 다 '이체'라 마지막(시트 버튼)을 누른다.
-    await tester.tap(find.text('이체').last);
-    await tester.pumpAndSettle();
-
-    // 5. 완료
-    expect(find.text('이체가 완료되었습니다.'), findsOneWidget);
-  });
-
-  // 캡처 기준: 금액이 0원이면 [확인]이 비활성이라 다음으로 못 넘어간다.
-  testWidgets('금액이 0원이면 확인이 비활성이다', (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: A1TransferAmount()));
-    await tester.pumpAndSettle();
-
-    await tester.tap(find.text('확인'));
-    await tester.pumpAndSettle();
-
-    // 여전히 키패드 화면 — 상세 폼으로 넘어가지 않았다.
-    expect(find.text('받는 분 통장 표시'), findsNothing);
+    // 확인 화면으로 넘어가지 않았다 — 여전히 금액 화면.
+    expect(find.text('수수료 무료'), findsNothing);
+    expect(find.text('얼마를 보낼까요?'), findsOneWidget);
   });
 
   // 더미 원칙: 출금가능금액(잔액)을 넘는 금액은 입력되지 않는다.
   testWidgets('출금가능금액을 넘는 금액은 입력되지 않는다',
       (WidgetTester tester) async {
-    await tester.pumpWidget(const MaterialApp(home: A1TransferAmount()));
+    await tester
+        .pumpWidget(const MaterialApp(home: A1TransferAmount(payee: ShDummy.taskPayee)));
     await tester.pumpAndSettle();
 
+    // 금액 표시와 출금가능금액 라인 둘 다 1,000,000원이 된다.
     await tester.tap(find.text('전액'));
     await tester.pump();
-    expect(find.text('12,500원'), findsOneWidget); // KbDummy.balance
+    expect(find.text('1,000,000원'), findsNWidgets(2)); // ShDummy.balance
 
-    // 여기서 숫자를 더 누르면 잔액을 넘으므로 무시된다.
+    // 여기서 숫자를 더 눌러도 잔액을 넘으므로 무시된다.
     await tester.tap(find.text('9'));
     await tester.pump();
-    expect(find.text('12,500원'), findsOneWidget);
+    expect(find.text('1,000,000원'), findsNWidgets(2));
   });
 }
 

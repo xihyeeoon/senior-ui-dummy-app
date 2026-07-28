@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
-import '../theme/kb_theme.dart';
-import '../widgets/kb_common.dart';
+import '../theme/sh_theme.dart';
+import '../widgets/sh_common.dart';
 import 'a1_menu.dart';
 import 'a1_transfer_entry.dart';
 
@@ -29,16 +29,16 @@ class _A1KbHomeState extends State<A1KbHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: KbColors.bg,
+      backgroundColor: ShColors.bg,
       body: Column(
         children: [
-          const KbDevBar(label: 'A1 · 원본 재현 — 기본 홈 (계좌 데이터는 더미)'),
+          const ShDevBar(label: 'A1 · 원본 재현 — 기본 홈 (계좌 데이터는 더미)'),
           Expanded(
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  const KbStatusBar(),
+                  const ShStatusBar(),
                   _header(context),
                   _govBanner(context),
                   _promoBanner(context),
@@ -75,7 +75,7 @@ class _A1KbHomeState extends State<A1KbHome> {
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: KbColors.line),
+                  border: Border.all(color: ShColors.line),
                 ),
                 child: Row(
                   children: [
@@ -84,7 +84,7 @@ class _A1KbHomeState extends State<A1KbHome> {
                       height: 18,
                       alignment: Alignment.center,
                       decoration: const BoxDecoration(
-                          color: KbColors.green, shape: BoxShape.circle),
+                          color: ShColors.green, shape: BoxShape.circle),
                       child: const Text('F',
                           style: TextStyle(
                               color: Colors.white,
@@ -97,9 +97,9 @@ class _A1KbHomeState extends State<A1KbHome> {
                 ),
               ),
               const SizedBox(width: 10),
-              const Text('홍길동님', style: KbText.name),
+              const Text('홍길동님', style: ShText.name),
               const SizedBox(width: 4),
-              const Text('›', style: TextStyle(fontSize: 18, color: KbColors.gray)),
+              const Text('›', style: TextStyle(fontSize: 18, color: ShColors.gray)),
             ],
           ),
           Row(
@@ -137,7 +137,7 @@ class _A1KbHomeState extends State<A1KbHome> {
         margin: const EdgeInsets.fromLTRB(16, 6, 16, 12),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: KbColors.card,
+          color: ShColors.card,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Stack(
@@ -215,7 +215,7 @@ class _A1KbHomeState extends State<A1KbHome> {
                       _Dot(),
                       _Dot(),
                       SizedBox(width: 6),
-                      Icon(Icons.play_arrow, size: 16, color: KbColors.gray),
+                      Icon(Icons.play_arrow, size: 16, color: ShColors.gray),
                     ],
                   ),
                 ],
@@ -246,7 +246,7 @@ class _A1KbHomeState extends State<A1KbHome> {
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 14),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
         decoration: BoxDecoration(
-          color: KbColors.card,
+          color: ShColors.card,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -283,7 +283,7 @@ class _A1KbHomeState extends State<A1KbHome> {
       margin: const EdgeInsets.symmetric(horizontal: 4),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: KbColors.card,
+        color: ShColors.card,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -298,7 +298,7 @@ class _A1KbHomeState extends State<A1KbHome> {
                 decoration: const BoxDecoration(
                     color: Color(0xFF6B5B4A), shape: BoxShape.circle),
                 child: const Text('★',
-                    style: TextStyle(color: KbColors.yellow, fontSize: 13)),
+                    style: TextStyle(color: ShColors.yellow, fontSize: 13)),
               ),
               const SizedBox(width: 8),
               const Text('KB마이핏통장',
@@ -307,7 +307,7 @@ class _A1KbHomeState extends State<A1KbHome> {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
                 decoration: BoxDecoration(
-                    color: KbColors.badge, borderRadius: BorderRadius.circular(6)),
+                    color: ShColors.badge, borderRadius: BorderRadius.circular(6)),
                 child: const Text('한도제한',
                     style: TextStyle(fontSize: 12, color: Color(0xFF55585F))),
               ),
@@ -319,7 +319,7 @@ class _A1KbHomeState extends State<A1KbHome> {
           const Row(
             children: [
               Text('000000-00-000000',
-                  style: TextStyle(fontSize: 15, color: KbColors.gray)),
+                  style: TextStyle(fontSize: 15, color: ShColors.gray)),
               SizedBox(width: 6),
               Icon(Icons.copy, size: 14, color: Color(0xFFB6B6BB)),
             ],
@@ -333,10 +333,10 @@ class _A1KbHomeState extends State<A1KbHome> {
                 padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 3),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.circular(999),
-                  border: Border.all(color: KbColors.line),
+                  border: Border.all(color: ShColors.line),
                 ),
                 child: const Text('숨김',
-                    style: TextStyle(fontSize: 13, color: KbColors.gray)),
+                    style: TextStyle(fontSize: 13, color: ShColors.gray)),
               ),
             ],
           ),
@@ -344,7 +344,7 @@ class _A1KbHomeState extends State<A1KbHome> {
           Row(
             children: [
               Expanded(
-                child: KbButton(
+                child: ShButton(
                   label: '이체',
                   onTap: () => Navigator.push(
                     context,
@@ -354,7 +354,7 @@ class _A1KbHomeState extends State<A1KbHome> {
               ),
               const SizedBox(width: 10),
               Expanded(
-                child: KbButton(
+                child: ShButton(
                     label: '전용화면',
                     primary: false,
                     onTap: () => showOutOfScope(context, '전용화면')),
@@ -371,7 +371,7 @@ class _A1KbHomeState extends State<A1KbHome> {
       margin: const EdgeInsets.symmetric(horizontal: 4),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: KbColors.card,
+        color: ShColors.card,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -381,7 +381,7 @@ class _A1KbHomeState extends State<A1KbHome> {
               style: const TextStyle(fontSize: 18, fontWeight: FontWeight.w800)),
           const SizedBox(height: 2),
           const Text('000000-00-000000',
-              style: TextStyle(fontSize: 15, color: KbColors.gray)),
+              style: TextStyle(fontSize: 15, color: ShColors.gray)),
           const SizedBox(height: 40),
           const Text('0원', style: TextStyle(fontSize: 30, fontWeight: FontWeight.w800)),
         ],
@@ -396,12 +396,12 @@ class _A1KbHomeState extends State<A1KbHome> {
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
-            const Icon(Icons.chevron_left, size: 20, color: KbColors.gray),
+            const Icon(Icons.chevron_left, size: 20, color: ShColors.gray),
             const SizedBox(width: 12),
             Text('${_page + 1} / 5',
                 style: const TextStyle(fontSize: 16, color: Color(0xFF4A4A4F))),
             const SizedBox(width: 12),
-            const Icon(Icons.chevron_right, size: 20, color: KbColors.gray),
+            const Icon(Icons.chevron_right, size: 20, color: ShColors.gray),
           ],
         ),
       ),
@@ -416,7 +416,7 @@ class _A1KbHomeState extends State<A1KbHome> {
         margin: const EdgeInsets.fromLTRB(16, 0, 16, 14),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 22),
         decoration: BoxDecoration(
-          color: KbColors.card,
+          color: ShColors.card,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Row(
@@ -486,9 +486,9 @@ class _A1KbHomeState extends State<A1KbHome> {
       child: Container(
         padding: const EdgeInsets.all(14),
         decoration: BoxDecoration(
-          color: KbColors.card,
+          color: ShColors.card,
           borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: KbColors.line),
+          border: Border.all(color: ShColors.line),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -524,7 +524,7 @@ class _A1KbHomeState extends State<A1KbHome> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
               decoration: BoxDecoration(
-                color: KbColors.darkBar,
+                color: ShColors.darkBar,
                 borderRadius: BorderRadius.circular(6),
               ),
               child: const Text('공지',
@@ -549,7 +549,7 @@ class _A1KbHomeState extends State<A1KbHome> {
           padding: const EdgeInsets.symmetric(horizontal: 26, vertical: 12),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(999),
-            border: Border.all(color: KbColors.line),
+            border: Border.all(color: ShColors.line),
           ),
           child: const Text('간편홈 보기', style: TextStyle(fontSize: 16)),
         ),
@@ -582,13 +582,13 @@ class _A1KbHomeState extends State<A1KbHome> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(it.$1,
-                      size: 24, color: active ? KbColors.yellow : KbColors.gray),
+                      size: 24, color: active ? ShColors.yellow : ShColors.gray),
                   const SizedBox(height: 3),
                   Text(it.$2,
                       style: TextStyle(
                           fontSize: 12,
                           fontWeight: active ? FontWeight.bold : FontWeight.normal,
-                          color: active ? KbColors.dark : KbColors.gray)),
+                          color: active ? ShColors.dark : ShColors.gray)),
                 ],
               ),
             ),
