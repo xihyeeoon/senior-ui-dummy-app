@@ -1,9 +1,59 @@
 import 'package:flutter/material.dart';
 
+import '../data/sh_bank_data.dart';
 import '../theme/sh_theme.dart';
 
 /// 조건(A1/A2) 홈 라우트 이름. 랜딩에서 홈을 push할 때 부여한다(main.dart).
 const kConditionHomeRoute = 'condition-home';
+
+/// 신한 스타일 오류 팝업 (에러코드 + 안내 + 파란 [확인]).
+/// 근거: 이체 확인 화면의 ETA00325/ELB00016 다이얼로그.
+void showShErrorDialog(BuildContext context,
+    {required String code, required String message}) {
+  showDialog<void>(
+    context: context,
+    builder: (ctx) => Dialog(
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(18)),
+      insetPadding: const EdgeInsets.symmetric(horizontal: 28),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(22, 24, 22, 18),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(code,
+                style: const TextStyle(
+                    fontSize: 19,
+                    fontWeight: FontWeight.w700,
+                    color: Color(0xFFE0433B))),
+            const SizedBox(height: 12),
+            Text(message,
+                style: const TextStyle(fontSize: 18, height: 1.4, color: ShColors.dark)),
+            const SizedBox(height: 22),
+            GestureDetector(
+              behavior: HitTestBehavior.opaque,
+              onTap: () => Navigator.of(ctx).pop(),
+              child: Container(
+                width: double.infinity,
+                padding: const EdgeInsets.symmetric(vertical: 17),
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1B64F2),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Text('확인',
+                    style: TextStyle(
+                        fontSize: 19,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.white)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
 
 /// 이체 완료/닫기 시 랜딩(첫 화면)이 아니라 시작한 조건 홈으로 되돌린다.
 /// 홈 라우트를 못 찾으면 첫 화면까지만 pop(안전장치).
@@ -167,8 +217,32 @@ class ShBankMark extends StatelessWidget {
     Color(0xFFE8802B), Color(0xFF2FA7A0), Color(0xFFB8455F), Color(0xFF3B6FB0),
   ];
 
+  /// 로고 에셋 개수(은행목록 38개 전부; 관세=국고금과 동일 태극 아이콘 b37).
+  /// 파일명은 웹 URL 인코딩 문제를 피하려 ASCII 인덱스(b0.png…b37.png)로 둔다.
+  static const _logoCount = 38;
+
   @override
   Widget build(BuildContext context) {
+    // 실제 로고가 있으면 사용(A1 충실도↑). 없으면 색원 근사.
+    // 은행: b0..b36(관세 제외), 증권사: s0..s28.
+    final bIdx = ShBankData.banks.indexOf(bank);
+    if (bIdx >= 0 && bIdx < _logoCount) return _asset('b$bIdx');
+    final sIdx = ShBankData.brokers.indexOf(bank);
+    if (sIdx >= 0) return _asset('s$sIdx');
+    return _circle();
+  }
+
+  Widget _asset(String name) {
+    return SizedBox(
+      width: size,
+      height: size,
+      child: Image.asset('assets/bank_logos/$name.png',
+          fit: BoxFit.contain,
+          errorBuilder: (context, error, stack) => _circle()),
+    );
+  }
+
+  Widget _circle() {
     final spec = _map[bank];
     final hash = bank.codeUnits.fold<int>(0, (a, b) => a + b);
     final bg = (spec?[0] as Color?) ?? _palette[hash % _palette.length];

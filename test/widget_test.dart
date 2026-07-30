@@ -9,6 +9,7 @@ import 'package:senior_ui_dummy_app/screens/a1_bill_input.dart';
 import 'package:senior_ui_dummy_app/screens/a1_kb_home.dart';
 import 'package:senior_ui_dummy_app/screens/a1_bill_main.dart';
 import 'package:senior_ui_dummy_app/screens/a1_menu.dart';
+import 'package:senior_ui_dummy_app/screens/a1_transfer_account.dart';
 import 'package:senior_ui_dummy_app/screens/a1_transfer_amount.dart';
 import 'package:senior_ui_dummy_app/screens/a1_transfer_entry.dart';
 import 'package:senior_ui_dummy_app/screens/sh_menu.dart';
@@ -18,6 +19,14 @@ import 'package:senior_ui_dummy_app/widgets/sh_number_keypad.dart';
 /// 키패드 범위로 한정해 숫자 키를 탭한다(필드에 찍힌 숫자와의 혼동 방지).
 Finder _keypadKey(String d) =>
     find.descendant(of: find.byType(ShNumberKeypad), matching: find.text(d));
+
+/// 계좌번호를 키패드로 한 자리씩 입력한다.
+Future<void> _typeAccount(WidgetTester tester, String acc) async {
+  for (final d in acc.split('')) {
+    await tester.tap(_keypadKey(d));
+  }
+  await tester.pump();
+}
 
 /// 이체 진입 화면은 세로가 길어 기본 테스트 창(800×600)에선 드롭다운·칩이
 /// 화면 밖으로 밀린다. 실제 폰 크기 창으로 렌더링해 모든 요소를 탭 가능하게 한다.
@@ -134,31 +143,36 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('계좌이체'), findsWidgets);
 
-    // 섹션명으로도 검색된다: '공과금' → 세금/공과금 › 납부하기
-    await tester.enterText(find.byType(TextField), '공과금');
+    // 공과금 과제: 앱 그대로 '공과' → '공과금납부'(은행) 결과
+    // (매칭부가 파랑 강조라 RichText → findRichText)
+    await tester.enterText(find.byType(TextField), '공과');
     await tester.pumpAndSettle();
-    expect(find.text('납부하기'), findsWidgets);
+    expect(find.text('공과금납부', findRichText: true), findsOneWidget);
 
-    // 결과 탭 → 실제 화면 이동(납부하기 → 공과금 메인)
-    await tester.tap(find.text('납부하기').first);
+    // 결과 탭 → 공과금 메인 진입
+    await tester.tap(find.text('공과금납부', findRichText: true));
     await tester.pumpAndSettle();
     expect(find.text('조회하기'), findsOneWidget);
   });
 
-  testWidgets('메뉴 검색: 조합 중간 입력(ㄱ,공,공ㄱ,공과…)도 결과에 걸린다',
+  // 앱 재현: 1글자("공")까진 결과 없이 안내, 2글자("공과")부터 결과.
+  testWidgets('메뉴 검색: 공은 결과 없음, 공과부터 공과금납부가 나온다',
       (WidgetTester tester) async {
-    _useTallPhone(tester); // 브로드 쿼리는 결과가 많아 지연 리스트 밖으로 밀리지 않게
     await tester.pumpWidget(const MaterialApp(home: ShMenu()));
     await tester.pumpAndSettle();
     await tester.tap(find.text('상품, 메뉴, 혜택 등을 검색해보세요'));
     await tester.pumpAndSettle();
 
-    // "공과금"을 조합해가는 각 단계에서 세금/공과금 › 납부하기가 계속 잡혀야 한다.
-    for (final step in ['ㄱ', '고', '공', '공ㄱ', '공과', '공과ㄱ', '공과그', '공과금']) {
-      await tester.enterText(find.byType(TextField), step);
-      await tester.pumpAndSettle();
-      expect(find.text('납부하기'), findsWidgets, reason: '"$step" 단계에서 결과 없음');
-    }
+    // "공" — 결과 없음, 검색버튼 안내
+    await tester.enterText(find.byType(TextField), '공');
+    await tester.pumpAndSettle();
+    expect(find.text('공과금납부', findRichText: true), findsNothing);
+    expect(find.textContaining('검색버튼'), findsOneWidget);
+
+    // "공과" — 공과금납부 노출
+    await tester.enterText(find.byType(TextField), '공과');
+    await tester.pumpAndSettle();
+    expect(find.text('공과금납부', findRichText: true), findsOneWidget);
   });
 
   testWidgets('입력란을 탭하면 키패드가 열리고 숫자가 입력된다',
@@ -297,82 +311,176 @@ void main() {
     expect(find.text('누구에게 보낼까요?'), findsOneWidget);
   });
 
-  testWidgets('이체 전체 플로우: 계좌입력 → 은행선택 → 금액 → 보내기 → 비밀번호 → 완료',
+  testWidgets('이체 진입: 계좌번호 직접 입력으로 키패드 화면에 들어간다',
       (WidgetTester tester) async {
-    _useTallPhone(tester);
     await tester.pumpWidget(const MaterialApp(home: A1TransferEntry()));
     await tester.pumpAndSettle();
 
-    // 1. 계좌번호 직접 입력 — '110' 입력 시 신한 추천 칩이 뜬다
-    await tester.tap(_keypadKey('1'));
-    await tester.tap(_keypadKey('1'));
-    await tester.tap(_keypadKey('0'));
-    await tester.pump();
-    expect(find.text('신한'), findsWidgets);
+    // 자주쓰는/내/최근 계좌는 공란(0개)
+    expect(find.text('자주쓰는 계좌'), findsOneWidget);
+    expect(find.text('0개'), findsWidgets);
 
-    // 2. 신한 칩으로 은행 선택 → [다음]
-    await tester.tap(find.text('신한').first);
-    await tester.pump();
+    await tester.tap(find.text('계좌번호 직접 입력'));
+    await tester.pumpAndSettle();
+    expect(find.text('없이 숫자만 입력'), findsOneWidget); // 키패드 입력 화면
+  });
+
+  testWidgets('이체 전체 플로우: 계좌입력 → 은행선택 → 금액 → 보내기 → 비밀번호 → 완료',
+      (WidgetTester tester) async {
+    _useTallPhone(tester);
+    await tester.pumpWidget(const MaterialApp(home: A1TransferAccount()));
+    await tester.pumpAndSettle();
+
+    // 1. 정답 계좌번호 직접 입력
+    await _typeAccount(tester, ShDummy.correctAccount);
+
+    // 2. 은행 시트에서 신한 선택 → [다음]
+    await tester.tap(find.text('은행 또는 증권사 선택'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('신한'));
+    await tester.pumpAndSettle();
     await tester.tap(find.text('다음'));
     await tester.pumpAndSettle();
 
-    // 3. 금액 입력 — 시작은 '얼마를 보낼까요?' 플레이스홀더
+    // 3. 금액 입력
     expect(find.text('얼마를 보낼까요?'), findsOneWidget);
     await tester.tap(_keypadKey('1'));
     await tester.pump();
     expect(find.text('1원'), findsOneWidget);
-
-    // 3. [다음] → 확인 화면 (질문 문구는 RichText)
     await tester.tap(find.text('다음'));
     await tester.pumpAndSettle();
-    expect(find.textContaining('보낼까요?', findRichText: true), findsOneWidget);
-    expect(find.text('수수료 무료'), findsOneWidget);
 
-    // 4. [보내기] → 계좌 비밀번호
+    // 4. 확인 → 보내기(정답) → 계좌 비밀번호
+    expect(find.textContaining('보낼까요?'), findsOneWidget);
     await tester.tap(find.text('보내기'));
     await tester.pumpAndSettle();
     expect(find.text('계좌 비밀번호'), findsOneWidget);
 
-    // 5. 4자리 입력 → 완료 (파란 키패드에 0~9 모두 존재)
+    // 5. 4자리 입력 → 완료
     for (var i = 0; i < 4; i++) {
       await tester.tap(find.text('7'));
       await tester.pump();
     }
-    await tester.pumpAndSettle(); // 완료 화면 전환(지연 타이머 소진)
+    await tester.pumpAndSettle();
     expect(find.textContaining('보냈어요', findRichText: true), findsOneWidget);
   });
 
-  // 요구사항: 계좌·은행이 모두 있어야 [다음]이 활성된다. 은행/증권사 시트로 선택.
-  testWidgets('이체 진입: 계좌·은행 모두 채워야 다음이 활성된다',
+  testWidgets('계좌입력: 계좌·은행 모두 채워야 다음이 활성된다',
       (WidgetTester tester) async {
     _useTallPhone(tester);
-    await tester.pumpWidget(const MaterialApp(home: A1TransferEntry()));
+    await tester.pumpWidget(const MaterialApp(home: A1TransferAccount()));
     await tester.pumpAndSettle();
 
     // 아무것도 없으면 다음을 눌러도 진행하지 않는다.
     await tester.tap(find.text('다음'));
     await tester.pumpAndSettle();
-    expect(find.text('누구에게 보낼까요?'), findsOneWidget);
+    expect(find.text('얼마를 보낼까요?'), findsNothing);
 
-    // 은행/증권사 시트 열기 → 두 탭과 증권사 목록 확인
-    await tester.tap(find.text('은행 또는 증권사 선택').first);
+    // 은행/증권사 시트: 두 탭과 증권사 목록 확인 후 신한 선택
+    await tester.tap(find.text('은행 또는 증권사 선택'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('증권사'));
     await tester.pumpAndSettle();
     expect(find.text('신한투자증권'), findsOneWidget);
-
-    // 은행 탭에서 신한 선택 → 시트 닫힘
     await tester.tap(find.text('은행'));
     await tester.pumpAndSettle();
     await tester.tap(find.text('신한'));
     await tester.pumpAndSettle();
 
-    // 계좌 한 자리 입력 후 다음 → 금액 화면으로 진행
+    await _typeAccount(tester, ShDummy.correctAccount);
+    await tester.tap(find.text('다음'));
+    await tester.pumpAndSettle();
+    expect(find.text('얼마를 보낼까요?'), findsOneWidget);
+  });
+
+  testWidgets('계좌입력: 최대 14자리, 초과 입력 시 경고',
+      (WidgetTester tester) async {
+    _useTallPhone(tester);
+    await tester.pumpWidget(const MaterialApp(home: A1TransferAccount()));
+    await tester.pumpAndSettle();
+
+    await _typeAccount(tester, '123456789012345'); // 15자리 시도
+    expect(find.text('최대 14자리 입력 가능합니다.'), findsOneWidget);
+    expect(find.text('12345678901234'), findsOneWidget); // 14자리에서 멈춤
+  });
+
+  // 오답 은행: 확인 화면 [보내기] 시 ETA00325 팝업.
+  testWidgets('이체 오류: 정답 계좌라도 은행 다르면 ETA00325',
+      (WidgetTester tester) async {
+    _useTallPhone(tester);
+    await tester.pumpWidget(const MaterialApp(home: A1TransferAccount()));
+    await tester.pumpAndSettle();
+
+    await _typeAccount(tester, ShDummy.correctAccount);
+    await tester.tap(find.text('은행 또는 증권사 선택'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('카카오뱅크')); // 오답 은행
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('다음'));
+    await tester.pumpAndSettle();
     await tester.tap(_keypadKey('1'));
     await tester.pump();
     await tester.tap(find.text('다음'));
     await tester.pumpAndSettle();
-    expect(find.text('얼마를 보낼까요?'), findsOneWidget);
+    await tester.tap(find.text('보내기'));
+    await tester.pumpAndSettle();
+    expect(find.text('ETA00325'), findsOneWidget);
+  });
+
+  // 오답 계좌: '누구에게 보낼까요?' [다음]에서 바로 ELB00016로 막힌다.
+  testWidgets('이체 오류: 계좌번호가 틀리면 진입 다음에서 ELB00016',
+      (WidgetTester tester) async {
+    _useTallPhone(tester);
+    await tester.pumpWidget(const MaterialApp(home: A1TransferAccount()));
+    await tester.pumpAndSettle();
+
+    await _typeAccount(tester, '11052107099'); // 오답 계좌
+    await tester.tap(find.text('은행 또는 증권사 선택'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('신한'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('다음'));
+    await tester.pumpAndSettle();
+
+    // 바로 팝업, 금액 화면으로 넘어가지 않음
+    expect(find.text('ELB00016'), findsOneWidget);
+    expect(find.text('얼마를 보낼까요?'), findsNothing);
+  });
+
+  // 은행 미선택이면 [다음]이 비활성(진행 불가).
+  testWidgets('이체 진입: 은행을 선택하지 않으면 다음이 비활성이다',
+      (WidgetTester tester) async {
+    _useTallPhone(tester);
+    await tester.pumpWidget(const MaterialApp(home: A1TransferAccount()));
+    await tester.pumpAndSettle();
+
+    await _typeAccount(tester, ShDummy.correctAccount); // 정답 계좌지만 은행 미선택
+    await tester.tap(find.text('다음'));
+    await tester.pumpAndSettle();
+    expect(find.text('얼마를 보낼까요?'), findsNothing); // 진행 안 함
+  });
+
+  // 백도어: 계좌 '0'이면 은행은 아무거나 골라도 통과(은행 선택 자체는 필요).
+  testWidgets('이체 백도어: 계좌 0 한 글자면 은행 무관 통과',
+      (WidgetTester tester) async {
+    _useTallPhone(tester);
+    await tester.pumpWidget(const MaterialApp(home: A1TransferAccount()));
+    await tester.pumpAndSettle();
+
+    await _typeAccount(tester, '0');
+    await tester.tap(find.text('은행 또는 증권사 선택'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('카카오뱅크')); // 아무 은행이나
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('다음'));
+    await tester.pumpAndSettle();
+    await tester.tap(_keypadKey('1'));
+    await tester.pump();
+    await tester.tap(find.text('다음'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('보내기'));
+    await tester.pumpAndSettle();
+    expect(find.text('계좌 비밀번호'), findsOneWidget); // 백도어 통과
   });
 
   // 캡처 기준: 금액이 0원이면 [다음]이 비활성이라 확인으로 못 넘어간다.

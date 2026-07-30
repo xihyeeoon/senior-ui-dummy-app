@@ -21,6 +21,33 @@ class ShDummy {
   static const taskPayee =
       ShPayee(name: '김철수', bank: '신한', accountNo: '110-000-000000');
 
+  // ---- 이체 과제 정답 판정 ----
+  //
+  // 정답: 신한은행 + 아래 계좌번호(- 없이 숫자만). 실험에서도 이 값을 정답으로 사용.
+  // 순차 숫자라 명백히 더미. 판정은 확인 화면 [보내기]에서 수행한다.
+  static const correctBank = '신한';
+  static const correctAccount = '110234567890';
+
+  /// 백도어: 계좌번호를 '0' 한 글자로 입력하면 은행과 무관하게 통과(실험자 편의).
+  static bool isBackdoorAccount(String acc) => acc == '0';
+
+  /// 계좌번호 자체가 유효한지(은행 무관). 진입 [다음]에서 검사 →
+  /// 아니면 ELB00016. 백도어이거나 정답 계좌면 통과.
+  static bool isAccountValid(String acc) =>
+      isBackdoorAccount(acc) || acc == correctAccount;
+
+  /// 이체 정답 판정. 확인 화면 [보내기]에서 사용.
+  ///  - ok: 정답(신한+정답계좌) 또는 백도어
+  ///  - wrongBank: 계좌는 맞지만 은행이 신한이 아님 → ETA00325
+  ///  - wrongAccount: 계좌번호 자체가 틀림 → ELB00016
+  static TransferCheck checkTransfer(String acc, String? bank) {
+    if (isBackdoorAccount(acc)) return TransferCheck.ok;
+    if (acc == correctAccount) {
+      return bank == correctBank ? TransferCheck.ok : TransferCheck.wrongBank;
+    }
+    return TransferCheck.wrongAccount;
+  }
+
   // ---- 하위호환(휴면 화면 참조) ----
   static const payeeName = '김철수';
   static const payeeBank = '카카오뱅크';
@@ -28,6 +55,9 @@ class ShDummy {
   static const payeeAccountNo = '3333-00-0000000';
   static const payeeAccountNoPlain = '333300000000';
 }
+
+/// 이체 정답 판정 결과.
+enum TransferCheck { ok, wrongBank, wrongAccount }
 
 /// 이체 상대 한 명. 진입 → 금액 → 확인 → 완료로 그대로 전달된다.
 class ShPayee {

@@ -80,20 +80,14 @@ class A1TransferConfirm extends StatelessWidget {
   }
 
   Widget _question() {
-    return RichText(
-      textAlign: TextAlign.center,
-      text: TextSpan(
+    // 직접 입력이라 예금주명이 없어 "아래 계좌로"로 표기(캡처 기준).
+    return Text('아래 계좌로\n${_comma(amount)}원 보낼까요?',
+        textAlign: TextAlign.center,
         style: const TextStyle(
             fontSize: 27,
             fontWeight: FontWeight.w800,
             color: ShColors.dark,
-            height: 1.35),
-        children: [
-          TextSpan(text: '${payee.name}님 계좌로\n'),
-          TextSpan(text: '${_comma(amount)}원 보낼까요?'),
-        ],
-      ),
-    );
+            height: 1.35));
   }
 
   Widget _detailCard() {
@@ -137,15 +131,32 @@ class A1TransferConfirm extends StatelessWidget {
     );
   }
 
+  void _onSend(BuildContext context) {
+    // 정답 판정은 여기서(캡처: 확인 화면 [보내기] 시 오류 팝업).
+    switch (ShDummy.checkTransfer(payee.accountNo, payee.bank)) {
+      case TransferCheck.ok:
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (_) => A1TransferPassword(payee: payee, amount: amount),
+          ),
+        );
+      case TransferCheck.wrongBank:
+        showShErrorDialog(context,
+            code: 'ETA00325',
+            message: '해당 계좌번호내 과목코드 오류입니다.\n입력하신 계좌번호를 확인해주세요.');
+      case TransferCheck.wrongAccount:
+        showShErrorDialog(context,
+            code: 'ELB00016',
+            message: '계좌번호[${payee.accountNo}]\n'
+                '입력하신 계좌번호가 올바르지 않습니다.\n계좌번호를 확인하시기 바랍니다.');
+    }
+  }
+
   Widget _sendButton(BuildContext context) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
-      onTap: () => Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (_) => A1TransferPassword(payee: payee, amount: amount),
-        ),
-      ),
+      onTap: () => _onSend(context),
       child: Container(
         width: double.infinity,
         padding: const EdgeInsets.symmetric(vertical: 20),

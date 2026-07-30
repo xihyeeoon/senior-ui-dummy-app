@@ -66,7 +66,7 @@ class A1TransferDone extends StatelessWidget {
             color: ShColors.dark,
             height: 1.35),
         children: [
-          TextSpan(text: '${payee.name}님 계좌로\n'),
+          const TextSpan(text: '아래 계좌로\n'),
           TextSpan(text: '${_comma(amount)}원 보냈어요.'),
         ],
       ),
