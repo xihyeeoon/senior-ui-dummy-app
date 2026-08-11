@@ -59,6 +59,8 @@ flutter:
 
   assets:
     - assets/bank_logos/
+    - assets/bill_icons/
+    - assets/home_icons/
 
   # To add assets to your application, add an assets section, like this:
   # assets:

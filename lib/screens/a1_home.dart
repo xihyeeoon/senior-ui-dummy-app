@@ -57,12 +57,12 @@ class A1Home extends StatelessWidget {
 
   // ---- 헤더 ----
   Widget _header(BuildContext context) {
-    Widget icon(IconData i, String label, {bool dot = false}) => OutOfScope(
+    Widget icon(String asset, String label, {bool dot = false}) => OutOfScope(
           label: label,
           child: Stack(
             clipBehavior: Clip.none,
             children: [
-              Icon(i, size: 27, color: const Color(0xFF2A2A2E)),
+              Image.asset('assets/home_icons/$asset.png', width: 32, height: 32),
               if (dot)
                 const Positioned(
                   right: -1,
@@ -93,18 +93,19 @@ class A1Home extends StatelessWidget {
           Text('${ShDummy.myName}님',
               style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800)),
           const Spacer(),
-          icon(Icons.chat_bubble_outline, '메시지'),
+          icon('h1', '메시지'),
           const SizedBox(width: 18),
-          icon(Icons.account_balance_wallet_outlined, '지갑'),
+          icon('h2', '지갑'),
           const SizedBox(width: 18),
-          icon(Icons.notifications_none, '알림', dot: true),
+          icon('h3', '알림', dot: true),
           const SizedBox(width: 18),
-          // 신한의 돋보기+줄 아이콘 = 전체메뉴 진입 (A1·A2 공유 메뉴)
+          // 줄+돋보기 아이콘 = 전체메뉴 진입 (A1·A2 공유 메뉴)
           GestureDetector(
+            key: const ValueKey('menuEntry'),
             behavior: HitTestBehavior.opaque,
             onTap: () => Navigator.push(
                 context, MaterialPageRoute(builder: (_) => const ShMenu())),
-            child: const Icon(Icons.manage_search, size: 27, color: Color(0xFF2A2A2E)),
+            child: Image.asset('assets/home_icons/h4.png', width: 32, height: 32),
           ),
         ],
       ),
@@ -583,14 +584,8 @@ class A1Home extends StatelessWidget {
         ],
       );
 
-  Widget _bankMark() => Container(
-        width: 44,
-        height: 44,
-        alignment: Alignment.center,
-        decoration: const BoxDecoration(color: Color(0xFF0046D6), shape: BoxShape.circle),
-        child: const Text('신한',
-            style: TextStyle(color: Colors.white, fontSize: 13, fontWeight: FontWeight.w800)),
-      );
+  // 자산 계좌(신한) 실제 은행 로고. 기존 은행 아이콘 세트(b0=신한) 재사용.
+  Widget _bankMark() => const ShBankMark('신한', size: 44);
 
   Widget _fullButton(BuildContext context, String label) => OutOfScope(
         label: label,

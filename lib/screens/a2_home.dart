@@ -51,7 +51,7 @@ class A2Home extends StatelessWidget {
 
   // ---- 헤더 (아이콘 + 라벨) ----
   Widget _header(BuildContext context) {
-    Widget navIcon(IconData i, String label, {bool dot = false}) => OutOfScope(
+    Widget navIcon(String asset, String label, {bool dot = false}) => OutOfScope(
           label: label,
           child: Column(
             mainAxisSize: MainAxisSize.min,
@@ -59,7 +59,7 @@ class A2Home extends StatelessWidget {
               Stack(
                 clipBehavior: Clip.none,
                 children: [
-                  Icon(i, size: 28, color: const Color(0xFF2A2A2E)),
+                  Image.asset('assets/home_icons/$asset.png', width: 34, height: 34),
                   if (dot)
                     const Positioned(
                       right: -1,
@@ -95,23 +95,25 @@ class A2Home extends StatelessWidget {
           Text('${ShDummy.myName}님',
               style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800)),
           const Spacer(),
-          navIcon(Icons.chat_bubble_outline, 'AI'),
+          navIcon('h1', 'AI'),
           const SizedBox(width: 16),
-          navIcon(Icons.account_balance_wallet_outlined, '쏠지갑'),
+          navIcon('h2', '쏠지갑'),
           const SizedBox(width: 16),
-          navIcon(Icons.notifications_none, '알림', dot: true),
+          navIcon('h3', '알림', dot: true),
           const SizedBox(width: 16),
           // 전체메뉴 진입 (A1·A2 공유 메뉴)
           GestureDetector(
+            key: const ValueKey('menuEntry'),
             behavior: HitTestBehavior.opaque,
             onTap: () => Navigator.push(
                 context, MaterialPageRoute(builder: (_) => const ShMenu())),
             child: Column(
               mainAxisSize: MainAxisSize.min,
-              children: const [
-                Icon(Icons.manage_search, size: 28, color: Color(0xFF2A2A2E)),
-                SizedBox(height: 3),
-                Text('메뉴', style: TextStyle(fontSize: 13, color: Color(0xFF4A4A4F))),
+              children: [
+                Image.asset('assets/home_icons/h4.png', width: 34, height: 34),
+                const SizedBox(height: 3),
+                const Text('메뉴',
+                    style: TextStyle(fontSize: 13, color: Color(0xFF4A4A4F))),
               ],
             ),
           ),
@@ -469,14 +471,8 @@ class A2Home extends StatelessWidget {
         ],
       );
 
-  Widget _bankMark() => Container(
-        width: 48,
-        height: 48,
-        alignment: Alignment.center,
-        decoration: const BoxDecoration(color: Color(0xFF0046D6), shape: BoxShape.circle),
-        child: const Text('신한',
-            style: TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w800)),
-      );
+  // 자산 계좌(신한) 실제 은행 로고. 기존 은행 아이콘 세트(b0=신한) 재사용.
+  Widget _bankMark() => const ShBankMark('신한', size: 48);
 
   Widget _fullButton(BuildContext context, String label, {required VoidCallback onTap}) =>
       GestureDetector(

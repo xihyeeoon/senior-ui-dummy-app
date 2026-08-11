@@ -5,6 +5,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:senior_ui_dummy_app/data/sh_dummy.dart';
 import 'package:senior_ui_dummy_app/main.dart';
+import 'package:senior_ui_dummy_app/screens/a1_bill_home.dart';
 import 'package:senior_ui_dummy_app/screens/a1_bill_input.dart';
 import 'package:senior_ui_dummy_app/screens/a1_kb_home.dart';
 import 'package:senior_ui_dummy_app/screens/a1_bill_main.dart';
@@ -71,7 +72,7 @@ void main() {
     await tester.tap(find.text('원본 재현 · 신한 일반 홈'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.manage_search)); // 상단 우측 전체메뉴 아이콘(줄+돋보기)
+    await tester.tap(find.byKey(const ValueKey('menuEntry'))); // 상단 우측 전체메뉴
     await tester.pumpAndSettle();
 
     expect(find.text('전체계좌 조회'), findsOneWidget); // 메뉴 은행 › 조회/관리
@@ -83,7 +84,7 @@ void main() {
     await tester.tap(find.text('쉬운홈(고령자 모드)'));
     await tester.pumpAndSettle();
 
-    await tester.tap(find.byIcon(Icons.manage_search));
+    await tester.tap(find.byKey(const ValueKey('menuEntry')));
     await tester.pumpAndSettle();
 
     expect(find.text('전체계좌 조회'), findsOneWidget); // 동일 공유 메뉴
@@ -173,6 +174,32 @@ void main() {
     await tester.enterText(find.byType(TextField), '공과');
     await tester.pumpAndSettle();
     expect(find.text('공과금납부', findRichText: true), findsOneWidget);
+  });
+
+  testWidgets('공과금 납부 플로우: 촬영 → 납부정보 → 납부 → 비밀번호 → 완료',
+      (WidgetTester tester) async {
+    _useTallPhone(tester);
+    await tester.pumpWidget(const MaterialApp(home: A1BillHome()));
+    await tester.pumpAndSettle();
+
+    // 납부하기 → 촬영 화면 → 셔터 → 납부정보
+    await tester.tap(find.text('납부하기'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const ValueKey('billShutter')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('납부정보'), findsOneWidget);
+    await tester.tap(find.text('납부'));
+    await tester.pumpAndSettle();
+
+    // 계좌 비밀번호 4자리 → 납부완료
+    expect(find.text('계좌 비밀번호'), findsOneWidget);
+    for (var i = 0; i < 4; i++) {
+      await tester.tap(find.text('7'));
+      await tester.pump();
+    }
+    await tester.pumpAndSettle();
+    expect(find.text('납부완료'), findsOneWidget);
   });
 
   testWidgets('입력란을 탭하면 키패드가 열리고 숫자가 입력된다',

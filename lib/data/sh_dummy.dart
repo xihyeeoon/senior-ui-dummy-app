@@ -17,6 +17,18 @@ class ShDummy {
   static const balance = 1000000;
   static const balanceText = '1,000,000원';
 
+  // ---- 공과금 납부 더미 (캡처의 실정보 전부 치환) ----
+  static const billTitle = '전기요금 납부';
+  static const billCustomerName = '홍길동'; // 고객명 (캡처: 실명 → 더미)
+  static const billEnoNo = '1700000000'; // 전자납부번호(고객번호)
+  static const billMonth = '202607'; // 청구연월
+  static const billDesignatedAcc = '31500000000000'; // 고객전용지정 계좌번호(더미)
+  static const billAddress = '○○동 ●●●-●'; // 고객주소(마스킹)
+  static const billAmount = 2160;
+  static const billAmountText = '2,160원';
+  static const billAvailableText = '1,000,000'; // 출금가능금액(더미)
+  static const billPaidAt = '2026.08.07 10:11'; // 납부일(더미 고정)
+
   /// 과제 대상 상대의 예금주명(더미). 계좌·은행은 진입 화면에서 직접 입력.
   static const taskPayee =
       ShPayee(name: '김철수', bank: '신한', accountNo: '110-000-000000');

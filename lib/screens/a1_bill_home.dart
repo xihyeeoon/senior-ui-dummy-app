@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../theme/sh_theme.dart';
 import '../widgets/sh_common.dart';
+import 'a1_bill_pay_camera.dart';
 
 /// 신한 세금/공과금 메인
 /// 근거: docs/screenshots/03_공과금납부/…_192712592(_00~_03).png (긴 스크롤 1화면)
@@ -97,12 +98,12 @@ class A1BillHome extends StatelessWidget {
   }
 
   Widget _entryCard(BuildContext context) {
-    Widget half(String title, String desc, IconData icon, Color fg) {
+    Widget half(String title, String desc, IconData icon, Color fg,
+        {VoidCallback? onTap}) {
       return Expanded(
         child: GestureDetector(
           behavior: HitTestBehavior.opaque,
-          onTap: () => showOutOfScope(
-              context, '$title (신한 지로번호 입력 화면 미구현 · 캡처 대기)'),
+          onTap: onTap ?? () => showOutOfScope(context, title),
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
             child: Column(
@@ -152,7 +153,11 @@ class A1BillHome extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   half('납부하기', '종이고지서 번호로 바로 납부',
-                      Icons.description_outlined, const Color(0xFF3B6FE0)),
+                      Icons.description_outlined, const Color(0xFF3B6FE0),
+                      onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (_) => const A1BillPayCamera()))),
                   const VerticalDivider(width: 1, color: Color(0xFFEDEEF1)),
                   half('조회하기', '전자고지서로 간편하게 확인',
                       Icons.phone_android, const Color(0xFF3FA65C)),
@@ -203,6 +208,20 @@ class A1BillHome extends StatelessWidget {
     );
   }
 
+  /// 에셋이 없을 때의 색상 원형 근사(폴백).
+  Widget _fallbackIcon(_BillItem it) {
+    return Container(
+      width: 48,
+      height: 48,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: it.bg,
+        borderRadius: BorderRadius.circular(13),
+      ),
+      child: Icon(it.icon, size: 25, color: it.fg),
+    );
+  }
+
   Widget _row(BuildContext context, _BillItem it) {
     return GestureDetector(
       behavior: HitTestBehavior.opaque,
@@ -212,16 +231,18 @@ class A1BillHome extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
         child: Row(
           children: [
-            Container(
-              width: 48,
-              height: 48,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: it.bg,
-                borderRadius: BorderRadius.circular(13),
-              ),
-              child: Icon(it.icon, size: 25, color: it.fg),
-            ),
+            it.asset != null
+                ? ClipRRect(
+                    borderRadius: BorderRadius.circular(13),
+                    child: Image.asset(
+                      'assets/bill_icons/${it.asset}.png',
+                      width: 48,
+                      height: 48,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stack) => _fallbackIcon(it),
+                    ),
+                  )
+                : _fallbackIcon(it),
             const SizedBox(width: 14),
             Expanded(
               child: Column(
@@ -254,7 +275,10 @@ class _BillItem {
   final IconData icon;
   final Color bg;
   final Color fg;
-  const _BillItem(this.label, this.icon, this.bg, this.fg, {this.sub});
+
+  /// 실제 아이콘 에셋 이름(assets/bill_icons/{asset}.png). null이면 Material 근사.
+  final String? asset;
+  const _BillItem(this.label, this.icon, this.bg, this.fg, {this.sub, this.asset});
 }
 
 class _BillSection {
@@ -276,34 +300,35 @@ const _red = Color(0xFFE0574F);
 
 const _sections = <_BillSection>[
   _BillSection('국고금', [
-    _BillItem('국세', Icons.receipt_long, _orangeBg, _orange),
-    _BillItem('관세', Icons.account_balance_wallet, _blueBg, _blue),
-    _BillItem('국고', Icons.account_balance, _grayBg, _gray),
-    _BillItem('국세 환급금 조회', Icons.plagiarism_outlined, _orangeBg, _orange),
+    _BillItem('국세', Icons.receipt_long, _orangeBg, _orange, asset: 'c1'),
+    _BillItem('관세', Icons.account_balance_wallet, _blueBg, _blue, asset: 'c2'),
+    _BillItem('국고', Icons.account_balance, _grayBg, _gray, asset: 'c3'),
+    _BillItem('국세 환급금 조회', Icons.plagiarism_outlined, _orangeBg, _orange,
+        asset: 'c4'),
   ]),
   _BillSection('통합지방세', [
     _BillItem('지방세', Icons.receipt_long, _orangeBg, _orange,
-        sub: '주민세, 재산세, 자동차세 등'),
+        sub: '주민세, 재산세, 자동차세 등', asset: 'c5'),
     _BillItem('환경개선부담금', Icons.directions_car, _blueBg, _blue,
-        sub: '경유자동차 사용 부담금'),
+        sub: '경유자동차 사용 부담금', asset: 'c6'),
     _BillItem('세외수입', Icons.volunteer_activism, _yellowBg, _yellow,
-        sub: '과태료, 수수료, 기부금 등'),
+        sub: '과태료, 수수료, 기부금 등', asset: 'c7'),
   ]),
   _BillSection('생활공과금', [
-    _BillItem('아파트/상가관리비', Icons.apartment, _blueBg, _blue),
-    _BillItem('KT통신요금', Icons.smartphone, _grayBg, Color(0xFF2B2B2B)),
-    _BillItem('전기요금/TV수신료', Icons.bolt, _blueBg, _blue),
-    _BillItem('상하수도요금', Icons.water_drop, _blueBg, _blue),
-    _BillItem('고속도로 통행료', Icons.alt_route, _grayBg, _gray),
+    _BillItem('아파트/상가관리비', Icons.apartment, _blueBg, _blue, asset: 'c8'),
+    _BillItem('KT통신요금', Icons.smartphone, _grayBg, Color(0xFF2B2B2B), asset: 'c9'),
+    _BillItem('전기요금/TV수신료', Icons.bolt, _blueBg, _blue, asset: 'c10'),
+    _BillItem('상하수도요금', Icons.water_drop, _blueBg, _blue, asset: 'c11'),
+    _BillItem('고속도로 통행료', Icons.alt_route, _grayBg, _gray, asset: 'c12'),
   ]),
   _BillSection('4대 보험/연금', [
-    _BillItem('국민연금', Icons.savings, _yellowBg, _yellow),
-    _BillItem('공무원연금', Icons.person, _blueBg, _blue),
-    _BillItem('통합징수 보험료', Icons.health_and_safety, _blueBg, _blue),
-    _BillItem('고용/산재보험료', Icons.beach_access, _yellowBg, _yellow),
+    _BillItem('국민연금', Icons.savings, _yellowBg, _yellow, asset: 'c13'),
+    _BillItem('공무원연금', Icons.person, _blueBg, _blue, asset: 'c14'),
+    _BillItem('통합징수 보험료', Icons.health_and_safety, _blueBg, _blue, asset: 'c15'),
+    _BillItem('고용/산재보험료', Icons.beach_access, _yellowBg, _yellow, asset: 'c16'),
   ]),
   _BillSection('벌금/과태료', [
-    _BillItem('교통범칙금', Icons.directions_car, _redBg, _red),
-    _BillItem('검찰청 벌과금', Icons.gavel, _redBg, _red),
+    _BillItem('교통범칙금', Icons.directions_car, _redBg, _red, asset: 'c17'),
+    _BillItem('검찰청 벌과금', Icons.gavel, _redBg, _red, asset: 'c18'),
   ]),
 ];
